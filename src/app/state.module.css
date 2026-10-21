@@ -1,0 +1,32 @@
+.state {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: var(--space-16) var(--space-6);
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}
+
+.heading {
+  font-size: var(--text-2xl);
+}
+
+.text {
+  color: var(--ink-soft);
+}
+
+.action {
+  font: inherit;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--beacon);
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-6);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.action:hover {
+  background: #ffb82e;
+}
