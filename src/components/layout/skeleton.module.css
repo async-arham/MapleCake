@@ -1,0 +1,4 @@
+.bar { height: 5.5rem; background: linear-gradient(90deg, var(--line) 0%, #e9f0f2 50%, var(--line) 100%); background-size: 200% 100%; border-radius: var(--radius-md); animation: shimmer 1.4s linear infinite; }
+.title { height: 2rem; width: 40%; margin-bottom: var(--space-6); }
+.grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+@keyframes shimmer { to { background-position: -200% 0; } }

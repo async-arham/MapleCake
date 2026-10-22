@@ -1,0 +1,20 @@
+.shell { min-height: 100vh; display: flex; flex-direction: column; }
+.topbar { background: var(--ink); color: #fff; }
+.topbarInner { max-width: 72rem; margin: 0 auto; padding: var(--space-3) var(--space-6); display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
+.brand { display: inline-flex; align-items: center; gap: var(--space-3); font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); color: #fff; text-decoration: none; }
+.lamp { width: 12px; height: 12px; border-radius: 50%; background: var(--beacon); box-shadow: 0 0 0 4px rgba(242, 165, 22, 0.3); }
+.nav { display: flex; gap: var(--space-1); flex: 1; }
+.navLink { color: #cfe0e5; text-decoration: none; padding: 0.4rem 0.8rem; border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 600; display: inline-flex; gap: var(--space-2); align-items: center; }
+.navLink:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.navActive { background: rgba(255, 255, 255, 0.16); color: #fff; }
+.count { background: var(--beacon); color: var(--ink); font-size: 0.7rem; font-weight: 800; padding: 0 0.4rem; border-radius: 999px; min-width: 1.2rem; text-align: center; }
+.user { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-sm); }
+.userName { color: #cfe0e5; }
+.signOut { font: inherit; font-size: var(--text-sm); font-weight: 600; color: #fff; background: transparent; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: var(--radius-md); padding: 0.35rem 0.8rem; cursor: pointer; }
+.signOut:hover { background: rgba(255, 255, 255, 0.12); }
+.main { flex: 1; width: 100%; max-width: 72rem; margin: 0 auto; padding: var(--space-8) var(--space-6) var(--space-16); }
+.pageHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-6); }
+.pageHeader h1 { font-size: var(--text-2xl); }
+.pageHeader p { color: var(--ink-soft); margin-top: var(--space-1); }
+.skip { position: absolute; left: -999px; top: 0; background: var(--beacon); color: var(--ink); padding: var(--space-2) var(--space-4); z-index: 10; }
+.skip:focus { left: var(--space-2); top: var(--space-2); }

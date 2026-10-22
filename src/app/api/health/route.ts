@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
 
-// Simple liveness check. Used locally and by hosting platforms.
-// Phase 2 extends this to also confirm the database connection.
 export const dynamic = "force-dynamic";
 
-export function GET() {
-  return NextResponse.json({ status: "ok", service: "sprintbeacon" });
+// Liveness + database check. Returns 503 if the database cannot be reached.
+export async function GET() {
+  try {
+    await db.$queryRaw`SELECT 1`;
+    return NextResponse.json({ status: "ok", service: "sprintbeacon", database: "up" });
+  } catch (error) {
+    console.error("Health check failed:", error);
+    return NextResponse.json({ status: "error", service: "sprintbeacon", database: "down" }, { status: 503 });
+  }
 }
