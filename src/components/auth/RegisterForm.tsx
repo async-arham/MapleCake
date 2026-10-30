@@ -39,7 +39,7 @@ function RegisterFields({ requireCode }: { requireCode: boolean }) {
 
   useEffect(() => {
     if (!until) return;
-    let timer: ReturnType<typeof setInterval> | undefined;
+    let timer: number | undefined;
     const tick = () => {
       setNow(Date.now());
       if (Date.now() >= until && timer !== undefined) window.clearInterval(timer);
