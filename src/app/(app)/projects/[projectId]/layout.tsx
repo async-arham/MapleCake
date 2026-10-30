@@ -1,6 +1,7 @@
 import { ArchivedBadge, RoleBadge } from "@/components/ui/Badges";
 import { ProjectTabs } from "@/components/projects/ProjectTabs";
 import styles from "@/components/projects/project.module.css";
+import { avatarTone } from "@/lib/avatar";
 import { can } from "@/lib/permissions";
 import { getProjectContext } from "@/server/context";
 
@@ -19,12 +20,17 @@ export default async function ProjectLayout({
   return (
     <>
       <div className={styles.head}>
-        <div className={styles.titleRow}>
-          <h1>{project.name}</h1>
-          {project.status === "ARCHIVED" && <ArchivedBadge />}
-          <RoleBadge value={role} />
+        <span className={`${styles.avatar} ${styles[`tone${avatarTone(project.name)}`]}`} aria-hidden="true">
+          {project.name.charAt(0).toUpperCase()}
+        </span>
+        <div>
+          <div className={styles.titleRow}>
+            <h1>{project.name}</h1>
+            {project.status === "ARCHIVED" && <ArchivedBadge />}
+            <RoleBadge value={role} />
+          </div>
+          {project.description && <p className={styles.desc}>{project.description}</p>}
         </div>
-        {project.description && <p className={styles.desc}>{project.description}</p>}
       </div>
       <ProjectTabs projectId={project.id} showSettings={can(role, "project:edit")} />
       {children}

@@ -1,8 +1,8 @@
 {
-  "name": "sprintbeacon",
+  "name": "maplecake",
   "version": "0.1.0",
   "private": true,
-  "description": "SprintBeacon - a project health tracker for developers",
+  "description": "Maplecake - a project health tracker for developers",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

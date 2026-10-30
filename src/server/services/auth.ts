@@ -1,5 +1,4 @@
 import "server-only";
-import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { dummyHash, hashPassword, verifyPassword } from "@/lib/auth/password";
 import type { RegisterInput } from "@/validation/schemas";
@@ -13,7 +12,8 @@ export async function registerUser(input: RegisterInput) {
       select: { id: true, email: true, name: true },
     });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+    // P2002 = "this email is already used". Checked by code so it works in every build mode.
+    if (typeof error === "object" && error !== null && (error as { code?: string }).code === "P2002") {
       throw new AppError("CONFLICT", "An account with this email already exists. Try signing in.");
     }
     throw error;

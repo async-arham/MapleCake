@@ -1,4 +1,4 @@
-// SprintBeacon database schema (PostgreSQL on Supabase).
+// Maplecake database schema (PostgreSQL on Supabase).
 //
 // DATABASE_URL = Supabase pooled connection (port 6543, add ?pgbouncer=true) - used by the running app.
 // DIRECT_URL   = Supabase direct connection (port 5432) - used only by `prisma migrate`.
@@ -56,6 +56,9 @@ enum ActivityAction {
   TASK_STATUS_CHANGED
   TASK_ASSIGNED
   TASK_DELETED
+  MEMBER_INVITED
+  INVITE_DECLINED
+  INVITE_CANCELLED
   MEMBER_ADDED
   MEMBER_ROLE_CHANGED
   MEMBER_REMOVED
@@ -69,6 +72,16 @@ enum NotificationType {
   ROLE_CHANGED
   REMOVED_FROM_PROJECT
   HEALTH_DROPPED
+  INVITE_RECEIVED
+  INVITE_ACCEPTED
+  INVITE_DECLINED
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
 }
 
 model User {
@@ -85,6 +98,8 @@ model User {
   createdTasks  Task[]          @relation("TaskCreator")
   activities    ActivityLog[]
   notifications Notification[]
+  sentInvites     ProjectInvite[] @relation("InviteSender")
+  receivedInvites ProjectInvite[] @relation("InviteReceiver")
 }
 
 model Project {
@@ -102,6 +117,7 @@ model Project {
   tasks         Task[]
   activities    ActivityLog[]
   notifications Notification[]
+  invites       ProjectInvite[]
 
   @@index([ownerId])
   @@index([status])
@@ -160,6 +176,7 @@ model ActivityLog {
 
   @@index([projectId, createdAt])
   @@index([actorId])
+  @@index([createdAt])
 }
 
 model Notification {
@@ -170,10 +187,32 @@ model Notification {
   type      NotificationType
   message   String
   readAt    DateTime?
+  dismissedAt DateTime?
   createdAt DateTime         @default(now())
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([userId, readAt, createdAt])
+  @@index([createdAt])
+}
+
+model ProjectInvite {
+  id          String       @id @default(cuid())
+  projectId   String
+  inviterId   String?
+  inviteeId   String
+  role        ProjectRole  @default(MEMBER)
+  status      InviteStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  respondedAt DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  inviter User?   @relation("InviteSender", fields: [inviterId], references: [id], onDelete: SetNull)
+  invitee User    @relation("InviteReceiver", fields: [inviteeId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, inviteeId])
+  @@index([inviteeId, status])
+  @@index([projectId, status])
+  @@index([createdAt])
 }

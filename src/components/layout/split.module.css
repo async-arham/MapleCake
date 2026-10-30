@@ -1,0 +1,39 @@
+/* form page on the left, helpful side panels on the right */
+.split { display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); align-items: start; }
+.column { display: grid; gap: 1.5rem; min-width: 0; }
+.formCard { background: #fff; border-radius: var(--radius-lg); padding: 2.2rem; }
+.formCard h2 { font-size: 1.55rem; margin-bottom: 0.4rem; }
+.formLead { color: var(--ink-soft); margin-bottom: 1.6rem; }
+.formCard form { max-width: none; }
+.danger { box-shadow: inset 0 0 0 2px #fbd0cb; }
+.dangerTitle { color: var(--coral); }
+.aside { display: grid; gap: 1.5rem; position: sticky; top: 1.5rem; min-width: 0; }
+.asideCard { background: #fff; border-radius: var(--radius-lg); padding: 1.8rem; }
+.asideCard h3 { font-size: 1.2rem; margin-bottom: 1.1rem; }
+.row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+
+.previewTop { display: flex; align-items: center; gap: 1rem; }
+.previewName { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.previewName.placeholder { color: var(--ink-faint); }
+.previewBand { color: var(--ink-soft); font-size: 0.9rem; font-weight: 600; }
+.previewDesc { margin-top: 1rem; color: var(--ink-soft); min-height: 3rem; overflow-wrap: anywhere; }
+.chips { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.1rem; padding-top: 1.1rem; border-top: 1px solid #eef0f4; }
+.chip { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; font-weight: 700; padding: 0.35rem 0.8rem; border-radius: var(--pill); background: #f1f2f6; }
+.avatarBig { flex: none; display: grid; place-items: center; width: 3.6rem; height: 3.6rem; border-radius: 1.1rem; font-weight: 800; font-size: 1.4rem; transition: background 0.3s, color 0.3s; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.2rem; }
+.steps li { display: flex; gap: 1rem; align-items: flex-start; }
+.stepIcon { font-size: 2rem; flex: none; }
+.stepTitle { font-weight: 800; line-height: 1.3; }
+.stepText { color: var(--ink-soft); font-size: 0.92rem; margin-top: 0.1rem; }
+
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.85rem 1.5rem; margin: 0; align-items: center; }
+.facts dt { color: var(--ink-soft); font-weight: 600; font-size: 0.92rem; }
+.facts dd { margin: 0; font-weight: 700; display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+.weights { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+.weights li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-weight: 700; }
+.points { color: var(--red); background: var(--tint-red); padding: 0.15rem 0.7rem; border-radius: var(--pill); font-size: 0.85rem; }
+.note { margin-top: 1.1rem; padding: 0.95rem 1.1rem; border-radius: var(--radius-md); background: var(--yellow-soft); font-size: 0.9rem; font-weight: 600; display: flex; gap: 0.6rem; align-items: flex-start; }
+.note i { font-size: 1.3rem; }
+.tips { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.6rem; color: var(--ink-soft); font-size: 0.93rem; }
+@media (max-width: 62rem) { .split { grid-template-columns: minmax(0, 1fr); } .aside { position: static; } }

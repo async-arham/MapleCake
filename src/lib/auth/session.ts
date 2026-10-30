@@ -32,6 +32,10 @@ export const getCurrentUser = cache(async () => {
 
 export async function requireUser() {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) {
+    // a cookie that no longer works means the session expired; no cookie means they never signed in
+    const hadCookie = (await cookies()).has(SESSION_COOKIE);
+    redirect(hadCookie ? "/login?expired=1" : "/login");
+  }
   return user;
 }

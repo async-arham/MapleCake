@@ -30,16 +30,19 @@ const gauge = (html) => Number(/Health score (\d+) out of 100/.exec(html)?.[1] ?
 console.log("\n== Public pages and route protection ==");
 const anon = new Browser();
 ok((await anon.get("/")).text.includes("Create account"), "landing page renders");
-for (const p of ["/dashboard", "/projects", "/projects/new", "/notifications"]) { const r = await anon.get(p); ok(r.status === 307 && r.location?.endsWith("/login"), `signed-out ${p} redirects to /login`, `${r.status} ${r.location}`); }
+for (const p of ["/dashboard", "/projects", "/projects/new", "/notifications"]) { const r = await anon.get(p); ok(r.status === 307 && r.location?.includes("/login"), `signed-out ${p} redirects to /login`, `${r.status} ${r.location}`); }
+ok((await anon.get("/projects")).location?.includes("next=%2Fprojects"), "signed-out redirect remembers the page you wanted");
 const health = await anon.get("/api/health"); ok(health.status === 200 && health.text.includes('"database":"up"'), "/api/health reports database up");
 ok((await anon.get("/api/cron/overdue")).status === 401, "cron endpoint rejects requests without the secret");
 anon.jar.set("sb_session", "eyJhbGciOiJIUzI1NiJ9.e30.forged");
 ok((await anon.get("/dashboard")).status === 307, "forged session cookie is rejected");
+ok((await anon.get("/dashboard")).location?.includes("expired=1"), "an invalid or expired session is explained on the login page");
 
 console.log("\n== Registration and login ==");
 const alice = new Browser();
 let r = await alice.submit("/register", "email", { name: "Alice", email: "alice@example.com", password: "short" });
 ok(r.text.includes("at least 10 characters"), "weak password shows an inline error", r.status);
+ok(r.text.includes('value="alice@example.com"') && r.text.includes('value="Alice"') && !r.text.includes('value="short"'), "failed submit keeps typed name and email but never echoes the password");
 r = await alice.submit("/register", "email", { name: "Alice", email: "alice@example.com", password: strongPw });
 ok(r.status === 303 && r.location?.endsWith("/dashboard"), "registering redirects to /dashboard", `${r.status} ${r.location}`);
 ok(alice.jar.has("sb_session"), "session cookie is set");
@@ -100,25 +103,39 @@ ok(/not found/i.test(r.text), "Bob cannot delete Alice's project by replaying he
 const still = (await alice.get(`/projects/${pid}/tasks/${taskId}`)).text;
 ok(!still.includes("HACKED"), "Alice's data is unchanged after the attacks");
 
-console.log("\n== Team roles (Bob becomes a viewer) ==");
+console.log("\n== Invitations (Bob is invited as a viewer) ==");
 r = await alice.submit(`/projects/${pid}/team`, "email", { email: "bob@example.com", role: "VIEWER" });
-ok(r.text.includes("Member added"), "Alice adds Bob as Viewer");
-ok((await bob.get(`/projects/${pid}`)).status === 200, "Bob can now open the project");
-ok((await bob.get("/notifications")).text.includes("added to"), "Bob received an in-app notification");
+ok(r.text.includes("Invitation sent"), "Alice sends Bob an invitation");
+const before = (await bob.get(`/projects/${pid}`)).text;
+ok(!before.includes("Project sections") && !before.includes("Apollo"), "Bob still cannot see the project before accepting");
+ok((await bob.get("/notifications")).text.includes("invited you"), "Bob gets an in-app notification about the invitation");
+ok((await anon.get("/api/live")).status === 401, "the live feed is private: signed-out requests are refused");
+const liveFeed = JSON.parse((await bob.get("/api/live")).text);
+ok(liveFeed.invites === 1 && liveFeed.unread >= 1 && liveFeed.toasts.some((t) => /invited you/.test(t.message)), "Bob's live feed shows the new invitation straight away", JSON.stringify(liveFeed).slice(0, 120));
+ok(liveFeed.toasts.every((t) => !/accept|decline/i.test(JSON.stringify(Object.keys(t)))), "live alerts carry no accept or decline actions (those live only on the Invitations page)");
+const inv = await bob.get("/invitations");
+ok(inv.text.includes("Apollo") && inv.text.includes("Viewer"), "Bob sees the invitation with the project name and role");
+r = await bob.submit("/invitations", "inviteId", { decision: "accept" }, inv.text);
+ok(r.status === 303 && r.location?.includes(`/projects/${pid}`), "accepting takes Bob to the project", `${r.status} ${r.location}`);
+ok((await bob.get(`/projects/${pid}`)).text.includes("Project sections"), "Bob can open the project once he has accepted");
+ok(JSON.parse((await bob.get("/api/live")).text).invites === 0, "after accepting, the invitation badge count drops to zero by itself");
+ok((await alice.get("/notifications")).text.includes("accepted your invitation"), "Alice is told that Bob accepted");
+r = await bob.submit("/invitations", "inviteId", { decision: "accept" }, inv.text);
+ok(/already accepted/i.test(r.text), "pressing Accept a second time is handled gracefully");
 { const x = await bob.get(`/projects/${pid}/tasks/new`); ok(/noindex/.test(x.text) && !x.text.includes('name="title"'), "viewer cannot open the new-task form"); }
 ok((await bob.get(`/projects/${pid}/settings`)).text.includes("Only owners and admins"), "viewer sees a permission message on Settings");
 const viewerEdit = (await bob.get(`/projects/${pid}/tasks/${taskId}`)).text;
 ok(!viewerEdit.includes('name="title"'), "viewer sees a read-only task (no edit form)");
 r = await bob.submit(`/projects/${pid}/tasks/${taskId}`, "title", { title: "HACKED", status: "DONE", priority: "LOW", type: "TASK" }, aliceEdit);
 ok(/permission/i.test(r.text), "viewer replaying an editor's form is refused", r.text.slice(0, 80));
-r = await alice.get(`/projects/${pid}/activity`); ok(r.text.includes("created the project") && r.text.includes("added Bob"), "activity history records what happened");
+r = await alice.get(`/projects/${pid}/activity`); ok(r.text.includes("created the project") && r.text.includes("invited Bob") && r.text.includes("Bob joined"), "activity history records what happened");
 
 console.log("\n== Archive and sign out ==");
 r = await alice.submit(`/projects/${pid}/settings`, "projectId", {}, (await alice.get(`/projects/${pid}/settings`)).text.split("<form").filter((f) => f.includes("Archive project")).map((f) => "<form" + f).join(""));
 ok(r.text.includes("archived"), "owner archives the project");
 r = await alice.get(`/projects/${pid}/tasks/new`); ok(r.text.includes("archived"), "archived project blocks new tasks");
 r = await alice.submit("/dashboard", "\\$ACTION_ID_[^\"]*", {});
-ok(r.status === 303 && r.location?.endsWith("/login") && !alice.jar.has("sb_session"), "sign out clears the session and goes to /login", `${r.status} ${r.location}`);
+ok(r.status === 303 && r.location?.includes("/login") && !alice.jar.has("sb_session"), "sign out clears the session and goes to /login", `${r.status} ${r.location}`);
 ok((await alice.get("/dashboard")).status === 307, "after sign out, /dashboard needs login again");
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

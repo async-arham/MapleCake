@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useOptimistic, useState, useTransition } from "react";
 import { PriorityBadge, TypeBadge } from "@/components/ui/Badges";
-import { Alert } from "@/components/ui/Alert";
+import { useDialogs } from "@/components/ui/DialogProvider";
+import { Select } from "@/components/ui/Select";
 import { STATUS_LABEL, TASK_STATUSES, type TaskPriority, type TaskStatus, type TaskType } from "@/lib/constants";
-import { formatDate } from "@/lib/dates";
+import { formatDate, initials } from "@/lib/dates";
 import { isOverdue } from "@/lib/health";
 import { moveTaskAction } from "@/server/actions/tasks";
 import styles from "./board.module.css";
@@ -20,13 +21,16 @@ export type BoardTask = {
   assignee: { id: string; name: string } | null;
 };
 
+const STATUS_ICON: Record<TaskStatus, string> = { TODO: "ri-circle-line", IN_PROGRESS: "ri-loader-line", IN_REVIEW: "ri-eye-line", DONE: "ri-check-double-line" };
+const MOVE_OPTIONS = TASK_STATUSES.map((s) => ({ value: s, label: STATUS_LABEL[s], icon: STATUS_ICON[s] }));
+
 type Props = { projectId: string; tasks: BoardTask[]; canEdit: boolean; hiddenDone: number };
 
 export function KanbanBoard({ projectId, tasks, canEdit, hiddenDone }: Props) {
   const [items, applyMove] = useOptimistic(tasks, (current, move: { id: string; status: TaskStatus }) =>
     current.map((t) => (t.id === move.id ? { ...t, status: move.status } : t)),
   );
-  const [error, setError] = useState<string | null>(null);
+  const { notify } = useDialogs();
   const [, startTransition] = useTransition();
   const [dragId, setDragId] = useState<string | null>(null);
   const [overColumn, setOverColumn] = useState<TaskStatus | null>(null);
@@ -34,7 +38,6 @@ export function KanbanBoard({ projectId, tasks, canEdit, hiddenDone }: Props) {
   function move(taskId: string, status: TaskStatus) {
     const task = items.find((t) => t.id === taskId);
     if (!canEdit || !task || task.status === status) return;
-    setError(null);
     startTransition(async () => {
       applyMove({ id: taskId, status });
       const form = new FormData();
@@ -42,18 +45,17 @@ export function KanbanBoard({ projectId, tasks, canEdit, hiddenDone }: Props) {
       form.set("taskId", taskId);
       form.set("status", status);
       const result = await moveTaskAction({ ok: false }, form);
-      if (!result.ok) setError(result.message ?? "The task could not be moved.");
+      if (!result.ok) void notify({ tone: "error", title: "Couldn't move the task", message: result.message ?? "Something went wrong. Please try again." });
     });
   }
 
   return (
     <>
       {canEdit ? (
-        <p className={styles.help}>Drag a card to another column, or use the “Move to” menu on a card.</p>
+        <p className={styles.help}><i className="ri-drag-move-2-line" aria-hidden="true" /> Drag a card to another column, or use the “Move to” menu on a card.</p>
       ) : (
-        <p className={styles.help}>You have read-only access, so cards cannot be moved.</p>
+        <p className={styles.help}><i className="ri-lock-line" aria-hidden="true" /> You have read-only access, so cards cannot be moved.</p>
       )}
-      {error && <Alert tone="error">{error}</Alert>}
       <div className={styles.board}>
         {TASK_STATUSES.map((status) => {
           const column = items.filter((t) => t.status === status);
@@ -61,7 +63,7 @@ export function KanbanBoard({ projectId, tasks, canEdit, hiddenDone }: Props) {
             <section
               key={status}
               aria-labelledby={`col-${status}`}
-              className={`${styles.column} ${overColumn === status ? styles.columnOver : ""}`}
+              className={`${styles.column} ${styles[`c_${status}`]} ${overColumn === status ? styles.columnOver : ""}`}
               onDragOver={(e) => {
                 if (!canEdit) return;
                 e.preventDefault();
@@ -77,11 +79,12 @@ export function KanbanBoard({ projectId, tasks, canEdit, hiddenDone }: Props) {
               }}
             >
               <h3 id={`col-${status}`} className={styles.colHead}>
+                <span className={styles.dot} aria-hidden="true" />
                 {STATUS_LABEL[status]}
                 <span className={styles.colCount}>{column.length}</span>
               </h3>
               {column.length === 0 ? (
-                <p className={styles.emptyCol}>No tasks</p>
+                <p className={styles.emptyCol}><i className="ri-inbox-line" aria-hidden="true" />No tasks</p>
               ) : (
                 <ul className={styles.cards}>
                   {column.map((task) => {
@@ -108,23 +111,33 @@ export function KanbanBoard({ projectId, tasks, canEdit, hiddenDone }: Props) {
                           <TypeBadge value={task.type} />
                           <PriorityBadge value={task.priority} />
                         </div>
-                        <div className={styles.meta}>
-                          {task.dueDate && <span className={late ? styles.late : undefined}>{late ? "Overdue · " : "Due "}{formatDate(task.dueDate)}</span>}
-                          <span>{task.assignee?.name ?? "Unassigned"}</span>
+                        <div className={styles.footer}>
+                          {task.dueDate ? (
+                            <span className={`${styles.due} ${late ? styles.late : ""}`}>
+                              <i className={late ? "ri-alarm-warning-line" : "ri-calendar-line"} aria-hidden="true" />
+                              {late ? "Overdue · " : ""}
+                              {formatDate(task.dueDate)}
+                            </span>
+                          ) : (
+                            <span />
+                          )}
+                          <span className={styles.person} title={task.assignee?.name ?? "Unassigned"}>
+                            <span className={`${styles.avatar} ${task.assignee ? "" : styles.avatarEmpty}`} aria-hidden="true">
+                              {task.assignee ? initials(task.assignee.name) : <i className="ri-user-line" />}
+                            </span>
+                            <span className="visually-hidden">{task.assignee?.name ?? "Unassigned"}</span>
+                          </span>
                         </div>
                         {canEdit && (
-                          <select
-                            className={styles.move}
+                          <Select
+                            compact
+                            triggerLabel="Move to"
+                            triggerIcon="ri-arrow-left-right-line"
                             aria-label={`Move “${task.title}” to another column`}
                             value={task.status}
-                            onChange={(e) => move(task.id, e.target.value as TaskStatus)}
-                          >
-                            {TASK_STATUSES.map((s) => (
-                              <option key={s} value={s}>
-                                Move to: {STATUS_LABEL[s]}
-                              </option>
-                            ))}
-                          </select>
+                            onChange={(next) => move(task.id, next as TaskStatus)}
+                            options={MOVE_OPTIONS}
+                          />
                         )}
                       </li>
                     );

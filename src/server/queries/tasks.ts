@@ -47,17 +47,19 @@ export async function listTasks(projectId: string, userId: string, query: TaskLi
             ? [{ title: dir }]
             : [{ dueDate: { sort: dir, nulls: "last" } }, { createdAt: "desc" }];
 
+  const allCount = await db.task.count({ where });
+  const page = Math.min(query.page, Math.max(1, Math.ceil(allCount / PAGE_SIZE)));
   const [total, tasks] = await Promise.all([
     db.task.count({ where }),
     db.task.findMany({
       where,
       orderBy,
-      skip: (query.page - 1) * PAGE_SIZE,
+      skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
       select: taskCard,
     }),
   ]);
-  return { tasks, total, totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
+  return { page, tasks, total, totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
 }
 
 const DONE_ON_BOARD = 25;

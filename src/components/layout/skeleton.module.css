@@ -1,4 +1,4 @@
-.bar { height: 5.5rem; background: linear-gradient(90deg, var(--line) 0%, #e9f0f2 50%, var(--line) 100%); background-size: 200% 100%; border-radius: var(--radius-md); animation: shimmer 1.4s linear infinite; }
-.title { height: 2rem; width: 40%; margin-bottom: var(--space-6); }
+.bar { height: 6rem; border-radius: var(--radius-lg); background: linear-gradient(90deg, #e3e5ec 0%, #f7f8fb 50%, #e3e5ec 100%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+.title { height: 2.4rem; width: 40%; margin-bottom: var(--space-6); border-radius: var(--pill); }
 .grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
 @keyframes shimmer { to { background-position: -200% 0; } }

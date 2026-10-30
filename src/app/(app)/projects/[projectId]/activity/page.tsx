@@ -6,7 +6,8 @@ import ui from "@/components/ui/ui.module.css";
 import { timeAgo } from "@/lib/dates";
 import { flattenParams, type RawSearchParams } from "@/lib/search-params";
 import { getProjectContext } from "@/server/context";
-import { listActivity } from "@/server/queries/activity";
+import { ACTIVITY_RETENTION_DAYS, listActivity } from "@/server/queries/activity";
+import { purgeExpiredRecords } from "@/server/services/retention";
 import { pageOnlySchema } from "@/validation/schemas";
 
 export const metadata: Metadata = { title: "Activity" };
@@ -20,8 +21,9 @@ export default async function ActivityPage({
 }) {
   const { projectId } = await params;
   const { project } = await getProjectContext(projectId);
-  const { page } = pageOnlySchema.parse(flattenParams(await searchParams));
-  const { items, total, totalPages } = await listActivity(project.id, page);
+  const { page: requested } = pageOnlySchema.parse(flattenParams(await searchParams));
+  await purgeExpiredRecords();
+  const { items, total, totalPages, page } = await listActivity(project.id, requested);
 
   if (total === 0) return <EmptyState title="No activity yet">Changes to tasks, members and settings are recorded here.</EmptyState>;
 
@@ -42,6 +44,7 @@ export default async function ActivityPage({
         </ul>
       </div>
       <Pagination page={page} totalPages={totalPages} total={total} basePath={`/projects/${project.id}/activity`} noun="event" />
+      <p className={styles.muted} style={{ marginTop: "1rem" }}>Activity is kept for {ACTIVITY_RETENTION_DAYS} days and then removed automatically.</p>
     </>
   );
 }

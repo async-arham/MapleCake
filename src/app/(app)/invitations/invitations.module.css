@@ -1,0 +1,12 @@
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.item { display: flex; align-items: center; gap: 1.4rem; flex-wrap: wrap; background: #fff; border-radius: var(--radius-lg); padding: 1.5rem 1.8rem; box-shadow: inset 5px 0 0 var(--yellow); }
+.avatar { flex: none; display: grid; place-items: center; width: 3.6rem; height: 3.6rem; border-radius: 1.1rem; font-weight: 800; font-size: 1.4rem; }
+.body { flex: 1; min-width: 14rem; }
+.headline { font-size: 1.1rem; line-height: 1.4; }
+.meta { display: flex; gap: 0.6rem 1rem; flex-wrap: wrap; align-items: center; margin-top: 0.5rem; font-size: 0.88rem; color: var(--ink-soft); font-weight: 600; }
+.blurb { margin-top: 0.4rem; font-size: 0.92rem; color: var(--ink-soft); }
+.actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.banner { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; background: var(--yellow-soft); border-radius: var(--radius-lg); padding: 1.1rem 1.6rem; margin-bottom: 1.5rem; }
+.bannerIcon { font-size: 2.2rem; }
+.bannerText { flex: 1; min-width: 12rem; font-weight: 700; }
+.bannerText span { display: block; font-weight: 500; color: var(--ink-soft); font-size: 0.92rem; }

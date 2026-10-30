@@ -6,9 +6,9 @@ import type { ActionState } from "@/lib/action-state";
 import { requireUser } from "@/lib/auth/session";
 import { deleteProjectSchema, projectIdSchema, projectSchema } from "@/validation/schemas";
 import { createProject, deleteProject, setProjectArchived, updateProject } from "../services/projects";
-import { formToObject, fromZod, safely } from "./helpers";
+import { formToObject, fromZod, safely, withValues } from "./helpers";
 
-export async function createProjectAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+export const createProjectAction = withValues(async (_prev: ActionState, formData: FormData): Promise<ActionState> => {
   const user = await requireUser();
   const parsed = projectSchema.safeParse(formToObject(formData));
   if (!parsed.success) return fromZod(parsed.error);
@@ -17,9 +17,9 @@ export async function createProjectAction(_prev: ActionState, formData: FormData
   revalidatePath("/projects");
   revalidatePath("/dashboard");
   redirect(`/projects/${result.value.id}`);
-}
+});
 
-export async function updateProjectAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+export const updateProjectAction = withValues(async (_prev: ActionState, formData: FormData): Promise<ActionState> => {
   const user = await requireUser();
   const raw = formToObject(formData);
   const ref = projectIdSchema.safeParse(raw);
@@ -31,7 +31,7 @@ export async function updateProjectAction(_prev: ActionState, formData: FormData
   revalidatePath(`/projects/${ref.data.projectId}`, "layout");
   revalidatePath("/projects");
   return { ok: true, message: "Project saved." };
-}
+});
 
 async function archive(formData: FormData, archived: boolean): Promise<ActionState> {
   const user = await requireUser();
@@ -45,15 +45,15 @@ async function archive(formData: FormData, archived: boolean): Promise<ActionSta
   return { ok: true, message: archived ? "Project archived." : "Project restored." };
 }
 
-export async function archiveProjectAction(_prev: ActionState, formData: FormData) {
+export const archiveProjectAction = withValues(async (_prev: ActionState, formData: FormData): Promise<ActionState> => {
   return archive(formData, true);
-}
+});
 
-export async function restoreProjectAction(_prev: ActionState, formData: FormData) {
+export const restoreProjectAction = withValues(async (_prev: ActionState, formData: FormData): Promise<ActionState> => {
   return archive(formData, false);
-}
+});
 
-export async function deleteProjectAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+export const deleteProjectAction = withValues(async (_prev: ActionState, formData: FormData): Promise<ActionState> => {
   const user = await requireUser();
   const parsed = deleteProjectSchema.safeParse(formToObject(formData));
   if (!parsed.success) return fromZod(parsed.error);
@@ -62,4 +62,4 @@ export async function deleteProjectAction(_prev: ActionState, formData: FormData
   revalidatePath("/projects");
   revalidatePath("/dashboard");
   redirect("/projects");
-}
+});

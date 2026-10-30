@@ -33,6 +33,34 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Enter your password").max(72),
 });
 
+// ---------- profile ----------
+// bcrypt only reads the first 72 BYTES, so a short password of multi-byte characters can still be too long.
+const withinBcryptLimit = (value: string) => new TextEncoder().encode(value).length <= 72;
+
+export const updateProfileSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(80, "Name is too long"),
+});
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Enter your current password").max(72, "Password must be at most 72 characters"),
+    newPassword: z
+      .string()
+      .min(10, "Password must be at least 10 characters")
+      .max(72, "Password must be at most 72 characters")
+      .regex(/[A-Za-z]/, "Password must contain a letter")
+      .regex(/\d/, "Password must contain a number")
+      .refine(withinBcryptLimit, "Password is too long. Some characters count as more than one byte and the limit is 72 bytes."),
+    confirmPassword: z.string().min(1, "Re-enter the new password"),
+  })
+  .refine((d) => d.newPassword === d.confirmPassword, { message: "The two passwords do not match", path: ["confirmPassword"] })
+  .refine((d) => d.newPassword !== d.currentPassword, { message: "The new password must be different from your current one", path: ["newPassword"] });
+
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, "Enter your password to confirm").max(72, "Password must be at most 72 characters"),
+  confirmEmail: z.string().trim().toLowerCase().min(1, "Type your email address to confirm").max(254),
+});
+
 // ---------- projects ----------
 export const projectSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name must be at most 100 characters"),
@@ -78,6 +106,8 @@ export const addMemberSchema = z.object({
   email: z.string().trim().toLowerCase().max(254).pipe(z.email("Enter a valid email address")),
   role: assignableRole,
 });
+export const cancelInviteSchema = z.object({ projectId: id, inviteId: id });
+export const respondInviteSchema = z.object({ inviteId: id, decision: z.enum(["accept", "decline"]) });
 export const changeRoleSchema = z.object({ projectId: id, memberId: id, role: assignableRole });
 export const removeMemberSchema = z.object({ projectId: id, memberId: id });
 
@@ -106,6 +136,7 @@ export const taskListSchema = z.object({
 export const pageOnlySchema = z.object({ page });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type ProjectInput = z.infer<typeof projectSchema>;
 export type TaskInput = z.infer<typeof taskSchema>;
 export type ProjectListQuery = z.infer<typeof projectListSchema>;

@@ -1,36 +1,60 @@
-.stats { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); margin-bottom: var(--space-8); }
-.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-4) var(--space-6); box-shadow: var(--shadow); }
-.statLabel { font-size: var(--text-sm); color: var(--ink-soft); font-weight: 600; }
-.statValue { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 700; line-height: 1.1; margin-top: var(--space-1); }
-.statWarn .statValue { color: var(--danger); }
-.section { margin-bottom: var(--space-8); }
-.section h2 { font-size: var(--text-xl); margin-bottom: var(--space-4); }
-.healthGrid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
-.healthCard { display: flex; gap: var(--space-4); align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-4); text-decoration: none; color: var(--ink); box-shadow: var(--shadow); }
-.healthCard:hover { border-color: var(--ink-faint); }
-.healthName { font-weight: 700; }
-.healthMeta { font-size: var(--text-sm); color: var(--ink-soft); }
-.charts { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); }
-.chartTitle { font-size: var(--text-base); margin-bottom: var(--space-4); }
-.barRow { display: grid; grid-template-columns: 6.5rem 1fr 2rem; gap: var(--space-3); align-items: center; font-size: var(--text-sm); margin-bottom: var(--space-3); }
-.barTrack { background: var(--paper); border-radius: 999px; height: 0.75rem; overflow: hidden; }
-.barFill { height: 100%; border-radius: 999px; background: var(--sea); }
-.fill_DONE { background: var(--ok); }
-.fill_CRITICAL { background: var(--danger); }
-.fill_HIGH { background: var(--warn); }
-.fill_MEDIUM { background: var(--sea); }
-.fill_LOW { background: var(--ink-faint); }
-.fill_IN_REVIEW { background: var(--beacon); }
-.fill_IN_PROGRESS { background: var(--sea); }
-.fill_TODO { background: var(--ink-faint); }
-.barNum { text-align: right; font-weight: 700; }
-.columns { display: flex; align-items: flex-end; gap: var(--space-3); height: 9rem; }
-.col { flex: 1; display: grid; gap: var(--space-1); text-align: center; align-content: end; height: 100%; font-size: 0.75rem; color: var(--ink-soft); }
-.colBar { background: var(--sea); border-radius: var(--radius-sm) var(--radius-sm) 0 0; min-height: 3px; }
-.colNum { font-weight: 700; color: var(--ink); }
+.stats { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr)); margin-bottom: 2.5rem; }
+.stat { display: grid; gap: 0.15rem; background: #fff; border-radius: var(--radius-lg); padding: 1.5rem 1.6rem; }
+.statIcon { font-size: 2.1rem; margin-bottom: 0.9rem; }
+.statLabel { font-size: 0.9rem; font-weight: 600; color: var(--ink-soft); }
+.statValue { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.045em; line-height: 1.1; }
+.statWarn .statValue { color: var(--red); }
+.statNote { font-size: 0.82rem; color: var(--ink-faint); font-weight: 600; }
+
+.section { margin-bottom: 2.75rem; }
+.section h2 { display: flex; align-items: center; gap: 0.7rem; font-size: 1.55rem; margin-bottom: var(--space-4); }
+.section h2 > span { font-size: 1.7rem; }
+
+.healthGrid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); }
+.healthCard { display: flex; gap: 1.1rem; align-items: center; background: #fff; border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; text-decoration: none; color: var(--ink); transition: box-shadow 0.2s; }
+.healthCard:hover { box-shadow: 0 12px 32px rgba(13, 12, 34, 0.1); }
+.healthText { min-width: 0; flex: 1; }
+.healthName { font-weight: 800; font-size: 1.08rem; }
+.healthMeta { font-size: 0.86rem; color: var(--ink-soft); margin-top: 0.15rem; }
+.healthGo { font-size: 1.4rem; color: var(--ink-faint); transition: transform 0.2s, color 0.2s; }
+.healthCard:hover .healthGo { transform: translateX(4px); color: var(--ink); }
+
+.charts { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(19.5rem, 1fr)); }
+.chartTitle { font-size: 1.1rem; margin-bottom: var(--space-6); }
+.barRow { display: grid; grid-template-columns: 6.5rem 1fr 2rem; gap: var(--space-3); align-items: center; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; }
+.barTrack { background: #eceef3; border-radius: var(--pill); height: 0.8rem; overflow: hidden; }
+.barFill { display: block; height: 100%; border-radius: var(--pill); background: var(--blue); transform-origin: left; animation: grow 1s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 90ms + 200ms); }
+@keyframes grow { from { transform: scaleX(0); } }
+.fill_DONE { background: var(--green); }
+.fill_CRITICAL { background: var(--red); }
+.fill_HIGH { background: var(--orange); }
+.fill_MEDIUM { background: var(--blue); }
+.fill_LOW { background: #a9abb8; }
+.fill_IN_REVIEW { background: #e0b400; }
+.fill_IN_PROGRESS { background: var(--blue); }
+.fill_TODO { background: #a9abb8; }
+.barNum { text-align: right; font-weight: 800; }
+.columns { display: flex; align-items: flex-end; gap: var(--space-3); height: 10rem; }
+.col { flex: 1; display: grid; gap: var(--space-1); text-align: center; align-content: end; height: 100%; font-size: 0.75rem; font-weight: 600; color: var(--ink-soft); }
+.colBar { background: var(--yellow); border: 2px solid var(--ink); border-radius: 0.6rem 0.6rem 0 0; min-height: 4px; transform-origin: bottom; animation: growUp 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 90ms + 200ms); }
+@keyframes growUp { from { transform: scaleY(0); } }
+.colNum { font-weight: 800; color: var(--ink); }
+
 .list { list-style: none; margin: 0; padding: 0; display: grid; }
-.list li { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.list li { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding: 0.9rem 0; border-bottom: 1px solid #eef0f4; flex-wrap: wrap; }
 .list li:last-child { border-bottom: 0; }
-.list a { color: var(--ink); font-weight: 600; text-decoration: none; }
-.list a:hover { text-decoration: underline; }
-.muted { color: var(--ink-soft); font-size: var(--text-sm); }
+.list a { font-weight: 700; text-decoration: none; }
+.list a:hover { text-decoration: underline; text-decoration-color: var(--yellow); }
+.muted { color: var(--ink-soft); font-size: 0.9rem; }
+.right { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+/* "get more done" cards, like the reference's "More ways to earn" */
+.actions { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+.actionCard { display: flex; flex-direction: column; gap: 0.6rem; background: #fff; border-radius: var(--radius-lg); padding: 1.9rem 1.7rem 1.7rem; }
+.actionIcon { font-size: 2.6rem; margin-bottom: 0.6rem; }
+.actionCard h3 { font-size: 1.35rem; }
+.actionCard p { color: var(--ink-soft); font-size: 1.02rem; flex: 1; margin-bottom: 0.9rem; }
+.arrowPill { display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0.4rem 0.4rem 1.5rem; border: 1.5px solid #e1e2e8; border-radius: var(--pill); color: var(--ink); font-weight: 600; text-decoration: none; transition: background 0.15s, border-color 0.15s; }
+.arrowPill:hover { background: #f6f7fa; border-color: #cfd1da; }
+.arrowCircle { display: grid; place-items: center; width: 2.7rem; height: 2.7rem; border-radius: 50%; background: #f1f2f6; font-size: 1.2rem; transition: background 0.15s; }
+.arrowPill:hover .arrowCircle { background: var(--yellow); }

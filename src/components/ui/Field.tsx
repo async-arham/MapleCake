@@ -1,7 +1,9 @@
 "use client";
 
-import { useId } from "react";
-import { useFormState } from "./ActionForm";
+import { useId, useState } from "react";
+import { useFormMeta } from "./ActionForm";
+import { DatePicker } from "./DatePicker";
+import { Select } from "./Select";
 import styles from "./ui.module.css";
 
 type Option = { value: string; label: string };
@@ -18,17 +20,29 @@ type Props = {
   disabled?: boolean;
   maxLength?: number;
   placeholder?: string;
+  autoFocus?: boolean;
+  /** Keep the label for screen readers only (for compact inline controls). */
+  labelHidden?: boolean;
+  /** Called with the new text whenever the person types. */
+  onValueChange?: (value: string) => void;
 };
 
-export function Field({ name, label, type = "text", defaultValue, options, required, hint, autoComplete, disabled, maxLength, placeholder }: Props) {
+export function Field({ name, label, type = "text", defaultValue, options, required, hint, autoComplete, disabled, maxLength, placeholder, autoFocus, labelHidden, onValueChange }: Props) {
   const id = useId();
-  const error = useFormState().fieldErrors?.[name];
+  const { state } = useFormMeta();
+  const [revealed, setRevealed] = useState(false);
+  const error = state.fieldErrors?.[name];
+  // After a failed submit, show what the person typed instead of the original value.
+  const value = state.values?.[name] ?? defaultValue;
+  // New key after each result so the input picks up the new default value.
+  const key = state.nonce ?? 0;
   const describedBy = [error ? `${id}-err` : null, hint ? `${id}-hint` : null].filter(Boolean).join(" ") || undefined;
-  const shared = {
+  const common = {
     id,
     name,
     required,
     disabled,
+    autoFocus,
     "aria-invalid": error ? true : undefined,
     "aria-describedby": describedBy,
     className: `${styles.input} ${error ? styles.invalid : ""}`,
@@ -36,22 +50,26 @@ export function Field({ name, label, type = "text", defaultValue, options, requi
 
   return (
     <div className={styles.field}>
-      <label htmlFor={id} className={styles.label}>
+      <label htmlFor={id} className={labelHidden ? "visually-hidden" : styles.label}>
         {label}
-        {required ? <span aria-hidden="true"> *</span> : null}
+        {required && !labelHidden ? <span aria-hidden="true"> *</span> : null}
       </label>
       {type === "textarea" ? (
-        <textarea {...shared} defaultValue={defaultValue} maxLength={maxLength} placeholder={placeholder} />
+        <textarea key={key} {...common} defaultValue={value} maxLength={maxLength} placeholder={placeholder} onChange={(e) => onValueChange?.(e.target.value)} />
       ) : type === "select" ? (
-        <select {...shared} defaultValue={defaultValue}>
-          {options?.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+        <Select key={key} id={id} name={name} options={options ?? []} defaultValue={value} invalid={Boolean(error)} disabled={disabled} autoFocus={autoFocus} aria-describedby={describedBy} />
+      ) : type === "date" ? (
+        <DatePicker key={key} id={id} name={name} defaultValue={value} invalid={Boolean(error)} disabled={disabled} autoFocus={autoFocus} aria-describedby={describedBy} />
+      ) : type === "password" ? (
+        <div className={styles.passwordWrap}>
+          <input key={key} {...common} type={revealed ? "text" : "password"} autoComplete={autoComplete} maxLength={maxLength} />
+          <button type="button" className={styles.reveal} aria-pressed={revealed} onClick={() => setRevealed((v) => !v)}>
+            <i className={revealed ? "ri-eye-off-line" : "ri-eye-line"} aria-hidden="true" />
+            <span className="visually-hidden">{revealed ? "Hide password" : "Show password"}</span>
+          </button>
+        </div>
       ) : (
-        <input {...shared} type={type} defaultValue={defaultValue} autoComplete={autoComplete} maxLength={maxLength} placeholder={placeholder} />
+        <input key={key} {...common} type={type} defaultValue={value} autoComplete={autoComplete} maxLength={maxLength} placeholder={placeholder} onChange={(e) => onValueChange?.(e.target.value)} />
       )}
       {hint && (
         <p id={`${id}-hint`} className={styles.hint}>
@@ -60,6 +78,7 @@ export function Field({ name, label, type = "text", defaultValue, options, requi
       )}
       {error && (
         <p id={`${id}-err`} className={styles.fieldError}>
+          <i className="ri-error-warning-line" aria-hidden="true" />
           {error}
         </p>
       )}

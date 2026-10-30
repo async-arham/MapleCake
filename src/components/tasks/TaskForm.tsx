@@ -10,6 +10,8 @@ type Props = {
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
   projectId: string;
   members: { id: string; name: string }[];
+  /** The signed-in person, marked "(You)" in the assignee list. */
+  currentUserId?: string;
   task?: {
     id: string;
     title: string;
@@ -23,12 +25,13 @@ type Props = {
   cancelHref: string;
 };
 
-export function TaskForm({ action, projectId, members, task, cancelHref }: Props) {
+export function TaskForm({ action, projectId, members, currentUserId, task, cancelHref }: Props) {
+  const people = [...members].sort((a, b) => Number(b.id === currentUserId) - Number(a.id === currentUserId));
   return (
-    <ActionForm action={action}>
+    <ActionForm action={action} requireChange={Boolean(task)}>
       <input type="hidden" name="projectId" value={projectId} />
       {task && <input type="hidden" name="taskId" value={task.id} />}
-      <Field name="title" label="Title" required maxLength={200} defaultValue={task?.title} />
+      <Field name="title" label="Title" required maxLength={200} defaultValue={task?.title} autoFocus={!task} />
       <Field name="description" label="Description" type="textarea" maxLength={5000} defaultValue={task?.description ?? ""} />
       <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))" }}>
         <Field name="type" label="Type" type="select" defaultValue={task?.type ?? "TASK"} options={TASK_TYPES.map((v) => ({ value: v, label: TYPE_LABEL[v] }))} />
@@ -41,7 +44,7 @@ export function TaskForm({ action, projectId, members, task, cancelHref }: Props
         label="Assignee"
         type="select"
         defaultValue={task?.assigneeId ?? ""}
-        options={[{ value: "", label: "Unassigned" }, ...members.map((m) => ({ value: m.id, label: m.name }))]}
+        options={[{ value: "", label: "Unassigned" }, ...people.map((m) => ({ value: m.id, label: m.id === currentUserId ? `(You) ${m.name}` : m.name }))]}
       />
       <div style={{ display: "flex", gap: "0.75rem" }}>
         <SubmitButton>{task ? "Save changes" : "Create task"}</SubmitButton>

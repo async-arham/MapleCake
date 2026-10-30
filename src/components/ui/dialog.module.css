@@ -1,0 +1,21 @@
+/* centred pop-up, modelled on the reference: icon top-left, close top-right, big title, two pill buttons */
+.backdrop { position: fixed; inset: 0; z-index: 400; display: grid; place-items: center; padding: 1.25rem; background: rgba(24, 24, 30, 0.58); animation: fadeIn 0.2s ease both; }
+.backdropOut { animation: fadeOut 0.2s ease both; }
+.dialog { position: relative; width: min(100%, 33rem); max-height: calc(100vh - 2.5rem); overflow: auto; background: #fff; border-radius: 24px; padding: 2.1rem 2.2rem 2rem; outline: none; animation: dialogIn 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.08) both; }
+.wide { width: min(100%, 40rem); }
+.dialogOut { animation: dialogOut 0.2s ease both; }
+.close { position: absolute; top: 1.2rem; right: 1.2rem; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; font-size: 1.6rem; color: var(--ink); background: transparent; border: 0; border-radius: 50%; cursor: pointer; transition: background 0.15s; }
+.close:hover { background: #f1f2f6; }
+.iconRow { margin-bottom: 1.3rem; font-size: 3.8rem; line-height: 1; animation: iconPop 0.5s 0.12s cubic-bezier(0.2, 1.3, 0.4, 1) both; }
+.title { font-size: clamp(1.7rem, 4vw, 2.2rem); letter-spacing: -0.03em; margin-bottom: 0.8rem; padding-right: 2rem; }
+.body { font-size: 1.12rem; line-height: 1.55; color: #26262e; }
+.body p + p, .body ul { margin-top: 0.8rem; }
+.actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.9rem; }
+.actions > * { flex: 1 1 9rem; }
+.timer { position: absolute; left: 0; bottom: 0; height: 4px; width: 100%; background: var(--yellow); transform-origin: left; animation: timerRun linear both; }
+@keyframes fadeIn { from { opacity: 0; } }
+@keyframes fadeOut { to { opacity: 0; } }
+@keyframes dialogIn { from { opacity: 0; transform: translateY(18px) scale(0.94); } }
+@keyframes dialogOut { to { opacity: 0; transform: translateY(10px) scale(0.97); } }
+@keyframes iconPop { from { opacity: 0; transform: scale(0.5) rotate(-12deg); } }
+@keyframes timerRun { from { transform: scaleX(1); } to { transform: scaleX(0); } }

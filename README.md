@@ -1,4 +1,4 @@
-# SprintBeacon
+# Maplecake
 
 A project health tracker for developers. Create projects, manage tasks on a Kanban board, and see a
 **0-100 health score** for every project with a plain-English explanation and suggested next steps.
@@ -14,6 +14,7 @@ A project health tracker for developers. Create projects, manage tasks on a Kanb
 - Dashboard: active projects, open / completed / overdue tasks, average health, per-project health, charts
 - Health score with explanation and suggested actions (see below)
 - Team members with roles (Owner, Admin, Member, Viewer), activity history, in-app notifications
+- Profile page: edit your name, change your password, delete your account (see below)
 - Search, filters, sorting and pagination on projects and tasks
 - Loading, empty and error states on every page
 
@@ -31,7 +32,7 @@ npm run db:seed                 # optional demo data
 npm run dev                     # http://localhost:3000
 ```
 
-Demo login after seeding: `demo@sprintbeacon.dev` / `demo-password-1` (also `teammate@sprintbeacon.dev`).
+Demo login after seeding: `demo@maplecake.dev` / `demo-password-1` (also `teammate@maplecake.dev`).
 
 ## 1. Create the Supabase database
 
@@ -82,7 +83,7 @@ npm run db:studio     # browse the data
 ```
 
 **Row Level Security.** Supabase exposes tables in the `public` schema through its REST API. The initial migration
-turns on RLS for every table with no policies, so that API can read nothing. SprintBeacon is unaffected because
+turns on RLS for every table with no policies, so that API can read nothing. Maplecake is unaffected because
 it connects directly through Prisma as the table owner and enforces access in server code. Do not add permissive
 RLS policies unless you also intend to use Supabase's client libraries.
 
@@ -111,6 +112,18 @@ its owner and admins get a notification.
 | Delete project | | | | yes |
 
 You can only hand out roles lower than your own; Owner can never be granted. Archived projects are read-only.
+
+### Profile and account deletion
+
+`/profile` lets you rename yourself, change your password (current password required, 5 attempts per 15 minutes) and delete your account
+(password and your typed email required). Deleting an account:
+
+- is **blocked** while you own a project that other people belong to (there is no ownership transfer yet: delete the project or remove the others);
+- deletes projects only you belong to, together with their tasks and activity;
+- keeps tasks you created in other people's projects, handing them to that project's owner, because a task must have a creator;
+- unassigns tasks assigned to you, leaves a "deleted their account" line in each project's activity, and runs in one transaction.
+
+Changing a password does not sign out other devices (sessions are stateless JWTs that last 7 days).
 
 ## 6. Testing
 

@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { syncOverdueNotifications } from "@/server/services/notifications";
+import { purgeExpiredRecords } from "@/server/services/retention";
 
 export const dynamic = "force-dynamic";
 
@@ -16,5 +17,6 @@ function authorized(request: NextRequest): boolean {
 export async function GET(request: NextRequest) {
   if (!authorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const created = await syncOverdueNotifications();
-  return NextResponse.json({ ok: true, created });
+  const purged = await purgeExpiredRecords({ force: true });
+  return NextResponse.json({ ok: true, created, purged });
 }

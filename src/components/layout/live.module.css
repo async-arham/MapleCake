@@ -1,0 +1,13 @@
+.stack { position: fixed; z-index: 150; top: 1rem; right: 1rem; display: grid; gap: 0.7rem; width: min(24rem, calc(100vw - 2rem)); pointer-events: none; }
+.toast { position: relative; display: flex; gap: 0.9rem; align-items: flex-start; padding: 1rem 2.6rem 1rem 1.1rem; background: #fff; border-radius: 22px; box-shadow: 0 18px 44px rgba(13, 12, 34, 0.2); text-decoration: none; color: var(--ink); pointer-events: auto; animation: toastSlide 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.1) both; }
+.toast:hover { box-shadow: 0 18px 44px rgba(13, 12, 34, 0.28); }
+.toastOut { animation: toastAway 0.25s ease-in both; }
+.icon { flex: none; font-size: 2rem; line-height: 1; }
+.title { font-weight: 800; font-size: 0.95rem; }
+.message { font-size: 0.9rem; color: #3a3a46; line-height: 1.4; margin-top: 0.1rem; overflow-wrap: anywhere; }
+.when { font-size: 0.75rem; color: var(--ink-faint); font-weight: 600; margin-top: 0.3rem; }
+.close { position: absolute; top: 0.6rem; right: 0.6rem; display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border: 0; border-radius: 50%; background: transparent; color: var(--ink-soft); font-size: 1.1rem; cursor: pointer; }
+.close:hover { background: #f1f2f6; color: var(--ink); }
+@keyframes toastSlide { from { opacity: 0; transform: translateX(2rem) scale(0.96); } }
+@keyframes toastAway { to { opacity: 0; transform: translateX(1.5rem); } }
+@media (max-width: 56rem) { .stack { right: 0.75rem; left: 0.75rem; width: auto; } }

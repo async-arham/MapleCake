@@ -6,6 +6,10 @@ import { requireMembership } from "../access";
 import { logActivity, notify } from "../activity";
 import { AppError } from "../errors";
 
+/**
+ * Adds someone to a project immediately, with no consent step. The app never calls this from a button:
+ * people are added through invitations (see services/invites.ts). It stays for tests and internal tools.
+ */
 export async function addMember(actorId: string, projectId: string, email: string, role: ProjectRole) {
   const { project, role: actorRole } = await requireMembership(actorId, projectId, "member:manage");
   if (!canAssignRole(actorRole, role)) {
@@ -13,7 +17,7 @@ export async function addMember(actorId: string, projectId: string, email: strin
   }
   const user = await db.user.findUnique({ where: { email }, select: { id: true, name: true } });
   if (!user) {
-    throw new AppError("VALIDATION", "No SprintBeacon account uses that email. Ask them to register first.");
+    throw new AppError("VALIDATION", "No Maplecake account uses that email. Ask them to register first.");
   }
   const existing = await db.projectMember.findUnique({
     where: { projectId_userId: { projectId, userId: user.id } },

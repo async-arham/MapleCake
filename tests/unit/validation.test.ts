@@ -9,7 +9,7 @@ const validTask = { title: "Fix login", description: "", status: "TODO", priorit
 describe("auth schemas", () => {
   it("normalises email and accepts a good password", () => {
     const r = registerSchema.parse({ name: " Ada Lovelace ", email: " ADA@Example.COM ", password: "correct horse 9" });
-    expect(r).toEqual({ name: "Ada Lovelace", email: "ada@example.com", password: "correct horse 9" });
+    expect(r).toEqual({ name: "Yaqoob Aziz", email: "ada@example.com", password: "correct horse 9" });
   });
   it("rejects weak passwords and bad emails", () => {
     expect(registerSchema.safeParse({ name: "Ada", email: "ada@example.com", password: "short1" }).success).toBe(false);

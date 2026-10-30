@@ -1,32 +1,6 @@
-.state {
-  max-width: 34rem;
-  margin: 0 auto;
-  padding: var(--space-16) var(--space-6);
-  display: grid;
-  gap: var(--space-4);
-  justify-items: start;
-}
-
-.heading {
-  font-size: var(--text-2xl);
-}
-
-.text {
-  color: var(--ink-soft);
-}
-
-.action {
-  font: inherit;
-  font-weight: 600;
-  color: var(--ink);
-  background: var(--beacon);
-  border: 0;
-  border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-6);
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.action:hover {
-  background: #ffb82e;
-}
+.state { max-width: 34rem; margin: 0 auto; padding: 6rem 1.5rem; display: grid; gap: 1rem; justify-items: center; text-align: center; }
+.icon { font-size: 4.5rem; line-height: 1; animation: float 5s ease-in-out infinite; }
+.heading { font-size: var(--text-3xl); }
+.text { color: var(--ink-soft); }
+.action { display: inline-flex; align-items: center; gap: 0.5rem; font: inherit; font-weight: 700; color: var(--ink); background: var(--yellow); border: 0; border-radius: var(--pill); padding: 0.85rem 1.8rem; text-decoration: none; cursor: pointer; transition: background 0.15s; }
+.action:hover { background: var(--yellow-hover); }

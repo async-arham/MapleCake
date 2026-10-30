@@ -10,6 +10,13 @@ export const ROLE_LABEL: Record<ProjectRole, string> = {
   VIEWER: "Viewer",
 };
 
+export const ROLE_BLURB: Record<ProjectRole, string> = {
+  OWNER: "Full control of the project.",
+  ADMIN: "Manage the team and project settings.",
+  MEMBER: "Create and edit tasks.",
+  VIEWER: "Read-only access.",
+};
+
 export const TASK_STATUSES = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 export const STATUS_LABEL: Record<TaskStatus, string> = {

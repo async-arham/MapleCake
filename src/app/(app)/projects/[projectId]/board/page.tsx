@@ -3,6 +3,7 @@ import { Alert } from "@/components/ui/Alert";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { KanbanBoard } from "@/components/tasks/KanbanBoard";
+import styles from "@/components/projects/project.module.css";
 import { can } from "@/lib/permissions";
 import { getProjectContext } from "@/server/context";
 import { getBoardTasks } from "@/server/queries/tasks";
@@ -17,7 +18,7 @@ export default async function BoardPage({ params }: { params: Promise<{ projectI
   const canEdit = can(role, "task:edit") && !archived;
 
   return (
-    <>
+    <div className={styles.pageStack}>
       {archived && <Alert tone="info">This project is archived. The board is read-only.</Alert>}
       {tasks.length === 0 ? (
         <EmptyState
@@ -29,6 +30,6 @@ export default async function BoardPage({ params }: { params: Promise<{ projectI
       ) : (
         <KanbanBoard projectId={project.id} tasks={tasks} canEdit={canEdit} hiddenDone={hiddenDone} />
       )}
-    </>
+    </div>
   );
 }

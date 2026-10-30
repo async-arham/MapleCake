@@ -26,10 +26,10 @@ export function Pagination({ page, totalPages, total, basePath, params = {}, nou
       </span>
       <span className={styles.pageLinks}>
         <Link href={href(page - 1)} className={`${styles.btn} ${styles.secondary} ${styles.sm} ${page <= 1 ? styles.disabledLink : ""}`} aria-disabled={page <= 1}>
-          Previous
+          <i className="ri-arrow-left-s-line" aria-hidden="true" /> Previous
         </Link>
         <Link href={href(page + 1)} className={`${styles.btn} ${styles.secondary} ${styles.sm} ${page >= totalPages ? styles.disabledLink : ""}`} aria-disabled={page >= totalPages}>
-          Next
+          Next <i className="ri-arrow-right-s-line" aria-hidden="true" />
         </Link>
       </span>
     </nav>

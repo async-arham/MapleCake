@@ -1,6 +1,7 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { startOfTodayUtc } from "@/lib/dates";
+import { visibleNotifications } from "../queries/notifications";
 
 export async function markNotificationRead(userId: string, notificationId: string) {
   // The userId in the filter means nobody can touch someone else's notification.
@@ -46,4 +47,25 @@ export async function syncOverdueNotifications(userId?: string, now: Date = new 
     })),
   });
   return fresh.length;
+}
+
+/** "Delete" a notification. The row is kept (hidden) so an overdue alert is never re-sent for the same task. */
+export async function dismissNotification(userId: string, notificationId: string) {
+  // userId in the filter means nobody can touch someone else's notification.
+  await db.notification.updateMany({ where: { id: notificationId, userId, dismissedAt: null }, data: { dismissedAt: new Date() } });
+}
+
+/** Clear every visible notification, or only the ones already read. Returns how many were cleared. */
+export async function dismissNotifications(userId: string, scope: "read" | "all") {
+  const result = await db.notification.updateMany({
+    where: { ...visibleNotifications(userId), ...(scope === "read" ? { readAt: { not: null } } : {}) },
+    data: { dismissedAt: new Date() },
+  });
+  return result.count;
+}
+
+/** Really deletes notifications older than 90 days (they stopped being visible after 14). */
+export async function purgeOldNotifications(now: Date = new Date()) {
+  const result = await db.notification.deleteMany({ where: { createdAt: { lt: new Date(now.getTime() - 90 * 86_400_000) } } });
+  return result.count;
 }

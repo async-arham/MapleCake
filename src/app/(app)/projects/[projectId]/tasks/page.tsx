@@ -4,6 +4,7 @@ import { OverdueBadge, PriorityBadge, StatusBadge, TypeBadge } from "@/component
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { Pagination } from "@/components/ui/Pagination";
+import { Select } from "@/components/ui/Select";
 import ui from "@/components/ui/ui.module.css";
 import { PRIORITY_LABEL, STATUS_LABEL, TASK_PRIORITIES, TASK_STATUSES, TASK_TYPES, TYPE_LABEL } from "@/lib/constants";
 import { formatDate } from "@/lib/dates";
@@ -26,7 +27,7 @@ export default async function TasksPage({
   const { projectId } = await params;
   const { user, project, role } = await getProjectContext(projectId);
   const query = taskListSchema.parse(flattenParams(await searchParams));
-  const [{ tasks, total, totalPages }, members] = await Promise.all([
+  const [{ tasks, total, totalPages, page }, members] = await Promise.all([
     listTasks(project.id, user.id, query),
     listProjectMembers(project.id),
   ]);
@@ -37,6 +38,19 @@ export default async function TasksPage({
     const dir = query.sort === key && query.dir === "asc" ? "desc" : "asc";
     const sp = new URLSearchParams({ ...(query.q ? { q: query.q } : {}), status: query.status, priority: query.priority, type: query.type, assignee: query.assignee, overdue: query.overdue, sort: key, dir });
     return <Link href={`${base}?${sp.toString()}`}>{label}{query.sort === key ? (query.dir === "asc" ? " ▲" : " ▼") : ""}</Link>;
+  };
+
+  const options = {
+    status: [{ value: "ALL", label: "Any" }, ...TASK_STATUSES.map((s) => ({ value: s, label: STATUS_LABEL[s] }))],
+    priority: [{ value: "ALL", label: "Any" }, ...TASK_PRIORITIES.map((s) => ({ value: s, label: PRIORITY_LABEL[s] }))],
+    type: [{ value: "ALL", label: "Any" }, ...TASK_TYPES.map((s) => ({ value: s, label: TYPE_LABEL[s] }))],
+    assignee: [
+      { value: "", label: "Anyone" },
+      { value: "me", label: "Me" },
+      { value: "none", label: "Unassigned" },
+      ...members.filter((m) => m.userId !== user.id).map((m) => ({ value: m.userId, label: m.user.name })),
+    ],
+    overdue: [{ value: "0", label: "Any time" }, { value: "1", label: "Overdue only" }],
   };
 
   return (
@@ -53,40 +67,23 @@ export default async function TasksPage({
         </div>
         <div className={ui.field}>
           <label htmlFor="status" className={ui.label}>Status</label>
-          <select id="status" name="status" defaultValue={query.status} className={ui.input}>
-            <option value="ALL">Any</option>
-            {TASK_STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
-          </select>
+          <Select id="status" name="status" compact defaultValue={query.status} options={options.status} />
         </div>
         <div className={ui.field}>
           <label htmlFor="priority" className={ui.label}>Priority</label>
-          <select id="priority" name="priority" defaultValue={query.priority} className={ui.input}>
-            <option value="ALL">Any</option>
-            {TASK_PRIORITIES.map((s) => <option key={s} value={s}>{PRIORITY_LABEL[s]}</option>)}
-          </select>
+          <Select id="priority" name="priority" compact defaultValue={query.priority} options={options.priority} />
         </div>
         <div className={ui.field}>
           <label htmlFor="type" className={ui.label}>Type</label>
-          <select id="type" name="type" defaultValue={query.type} className={ui.input}>
-            <option value="ALL">Any</option>
-            {TASK_TYPES.map((s) => <option key={s} value={s}>{TYPE_LABEL[s]}</option>)}
-          </select>
+          <Select id="type" name="type" compact defaultValue={query.type} options={options.type} />
         </div>
         <div className={ui.field}>
           <label htmlFor="assignee" className={ui.label}>Assignee</label>
-          <select id="assignee" name="assignee" defaultValue={query.assignee} className={ui.input}>
-            <option value="">Anyone</option>
-            <option value="me">Me</option>
-            <option value="none">Unassigned</option>
-            {members.filter((m) => m.userId !== user.id).map((m) => <option key={m.userId} value={m.userId}>{m.user.name}</option>)}
-          </select>
+          <Select id="assignee" name="assignee" compact defaultValue={query.assignee} options={options.assignee} />
         </div>
         <div className={ui.field}>
           <label htmlFor="overdue" className={ui.label}>Due</label>
-          <select id="overdue" name="overdue" defaultValue={query.overdue} className={ui.input}>
-            <option value="0">Any time</option>
-            <option value="1">Overdue only</option>
-          </select>
+          <Select id="overdue" name="overdue" compact defaultValue={query.overdue} options={options.overdue} />
         </div>
         <input type="hidden" name="sort" value={query.sort} />
         <input type="hidden" name="dir" value={query.dir} />
@@ -134,7 +131,7 @@ export default async function TasksPage({
               </tbody>
             </table>
           </div>
-          <Pagination page={query.page} totalPages={totalPages} total={total} basePath={base} noun="task" params={{ ...(query.q ? { q: query.q } : {}), status: query.status, priority: query.priority, type: query.type, assignee: query.assignee, overdue: query.overdue, sort: query.sort, dir: query.dir }} />
+          <Pagination page={page} totalPages={totalPages} total={total} basePath={base} noun="task" params={{ ...(query.q ? { q: query.q } : {}), status: query.status, priority: query.priority, type: query.type, assignee: query.assignee, overdue: query.overdue, sort: query.sort, dir: query.dir }} />
         </>
       )}
     </>

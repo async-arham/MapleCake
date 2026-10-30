@@ -5,7 +5,7 @@ import { SESSION_COOKIE, verifySession } from "@/lib/auth/token";
 // /login and /register. This is only a convenience. Real authorization is enforced again in
 // every page and Server Action (see requireUser and requireMembership).
 
-const PROTECTED = ["/dashboard", "/projects", "/notifications"];
+const PROTECTED = ["/dashboard", "/projects", "/notifications", "/profile"];
 const AUTH_PAGES = ["/login", "/register"];
 
 export async function proxy(request: NextRequest) {
@@ -16,6 +16,8 @@ export async function proxy(request: NextRequest) {
 
   if (!userId && PROTECTED.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     const url = new URL("/login", request.url);
+    url.searchParams.set("next", pathname + request.nextUrl.search);
+    if (token) url.searchParams.set("expired", "1");
     return NextResponse.redirect(url);
   }
   if (userId && AUTH_PAGES.includes(pathname)) {
@@ -25,5 +27,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/projects/:path*", "/notifications/:path*", "/login", "/register"],
+  matcher: ["/dashboard/:path*", "/projects/:path*", "/notifications/:path*", "/profile/:path*", "/login", "/register"],
 };

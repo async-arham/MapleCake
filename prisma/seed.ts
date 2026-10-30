@@ -21,11 +21,11 @@ const day = (offset: number) => {
 
 async function main() {
   await db.project.deleteMany({ where: { name: "Demo: Checkout Rebuild" } });
-  await db.user.deleteMany({ where: { email: { in: ["demo@sprintbeacon.dev", "teammate@sprintbeacon.dev"] } } });
+  await db.user.deleteMany({ where: { email: { in: ["demo@maplecake.dev", "teammate@maplecake.dev", "demo@sprintbeacon.dev", "teammate@sprintbeacon.dev"] } } });
 
   const passwordHash = await bcrypt.hash(PASSWORD, 12);
-  const demo = await db.user.create({ data: { email: "demo@sprintbeacon.dev", name: "Demo Owner", passwordHash } });
-  const mate = await db.user.create({ data: { email: "teammate@sprintbeacon.dev", name: "Sam Teammate", passwordHash } });
+  const demo = await db.user.create({ data: { email: "demo@maplecake.dev", name: "Demo Owner", passwordHash } });
+  const mate = await db.user.create({ data: { email: "teammate@maplecake.dev", name: "Sam Teammate", passwordHash } });
 
   const project = await db.project.create({
     data: {
@@ -73,7 +73,7 @@ async function main() {
     data: { userId: mate.id, projectId: project.id, type: "ADDED_TO_PROJECT", message: "You were added to “Demo: Checkout Rebuild” as Member." },
   });
 
-  console.log(`Seeded. Sign in with demo@sprintbeacon.dev or teammate@sprintbeacon.dev, password: ${PASSWORD}`);
+  console.log(`Seeded. Sign in with demo@maplecake.dev or teammate@maplecake.dev, password: ${PASSWORD}`);
 }
 
 main()

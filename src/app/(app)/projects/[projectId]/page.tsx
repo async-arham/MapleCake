@@ -24,7 +24,7 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
   const total = Object.values(overview.byStatus).reduce((a, b) => a + b, 0);
 
   return (
-    <>
+    <div className={styles.pageStack}>
       <section className={`${ui.card} ${styles.healthPanel}`} aria-labelledby="health-title">
         <div className={styles.gaugeBox}>
           <HealthGauge score={health.score} band={health.band} size={140} />
@@ -132,6 +132,6 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
           </p>
         </section>
       </div>
-    </>
+    </div>
   );
 }

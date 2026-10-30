@@ -47,7 +47,7 @@ describe.skipIf(!enabled)("authorization and data rules (real database)", () => 
       qHealth: await import("@/server/queries/health"),
       qDash: await import("@/server/queries/dashboard"),
     };
-    await m.db.$executeRawUnsafe(`TRUNCATE "User", "Project", "ProjectMember", "Task", "ActivityLog", "Notification" CASCADE`);
+    await m.db.$executeRawUnsafe(`TRUNCATE "User", "Project", "ProjectMember", "Task", "ActivityLog", "Notification", "ProjectInvite" CASCADE`);
     const reg = (name: string) => m.auth.registerUser({ name, email: `${name.toLowerCase()}@test.dev`, password: "password-1234" });
     [alice, bob, carol] = await Promise.all([reg("Alice"), reg("Bob"), reg("Carol")]);
     project = await m.projects.createProject(alice.id, { name: "Apollo", description: null });
