@@ -52,6 +52,14 @@ textarea.input { min-height: 8rem; max-height: 22rem; resize: none; field-sizing
 .reveal { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 2.2rem; height: 2.2rem; font-size: 1.2rem; color: var(--ink-soft); background: transparent; border: 0; border-radius: var(--pill); cursor: pointer; }
 .reveal:hover { background: rgba(13, 12, 34, 0.07); color: var(--ink); }
 
+/* a small text button inside the right end of an input, like "Resend" on the verification code field */
+.trailingWrap { position: relative; display: flex; }
+.trailingWrap .input { padding-right: 9.5rem; }
+.inlineAction { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); height: 2.2rem; padding: 0 0.9rem; font: inherit; font-size: 0.9rem; font-weight: 700; color: var(--ink); background: transparent; border: 0; border-radius: var(--pill); cursor: pointer; white-space: nowrap; }
+.inlineAction:hover:not(:disabled) { background: rgba(13, 12, 34, 0.07); }
+.inlineAction:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.inlineAction:disabled { color: var(--ink-faint); cursor: default; }
+
 /* ---------- inline notices (information only; errors and confirmations use pop-ups) ---------- */
 .alert { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.9rem 1.2rem; border-radius: var(--radius-md); font-size: 0.92rem; font-weight: 600; }
 .alert i { font-size: 1.25rem; margin-top: 0.05rem; }
@@ -202,6 +210,7 @@ textarea.input { min-height: 8rem; max-height: 22rem; resize: none; field-sizing
   .selectCompact { min-height: 2.75rem; }
   .option { padding: 0.8rem 0.9rem; }
   .reveal { width: 2.75rem; height: 2.75rem; right: 0.25rem; }
+  .inlineAction { height: 2.75rem; right: 0.25rem; }
   .calNav { width: 2.75rem; height: 2.75rem; }
   .githubIcon { width: 2.9rem; height: 2.9rem; }
 }

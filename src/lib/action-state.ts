@@ -11,3 +11,16 @@ export type ActionState = {
 };
 
 export const initialActionState: ActionState = { ok: false };
+
+/** What asking for a sign-up code reports back to the form. */
+export type SendCodeState = {
+  ok: boolean;
+  /** Shown under the code field. */
+  message?: string;
+  /** Shown under the email field (invalid address, or an account already exists). */
+  emailError?: string;
+  /** The Resend button stays off for this long. */
+  retryAfterSeconds?: number;
+  /** Development only: no SMTP is set up, so the code was printed in the server terminal instead of emailed. */
+  devNote?: boolean;
+};

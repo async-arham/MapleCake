@@ -216,3 +216,20 @@ model ProjectInvite {
   @@index([projectId, status])
   @@index([createdAt])
 }
+
+/// A pending sign-up verification code. At most one row per email address.
+/// The row is deleted the moment the code is used to create the account.
+/// It stays after expiry (until cleaned up) so the resend cooldown and hourly limit keep working.
+model EmailCode {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  codeHash        String
+  attempts        Int      @default(0) // wrong guesses against the current code
+  sendCount       Int      @default(1) // codes sent in the current one-hour window
+  windowStartedAt DateTime @default(now())
+  lastSentAt      DateTime @default(now())
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+
+  @@index([expiresAt])
+}

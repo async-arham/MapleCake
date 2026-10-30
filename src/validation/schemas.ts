@@ -6,6 +6,7 @@ import {
   TASK_TYPES,
 } from "@/lib/constants";
 import { parseDateOnly } from "@/lib/dates";
+import { CODE_FORMAT, normalizeCode } from "@/lib/auth/email-code-config";
 
 // ---------- helpers ----------
 const blankToNull = (value: unknown) =>
@@ -26,6 +27,21 @@ export const registerSchema = z.object({
     .max(72, "Password must be at most 72 characters")
     .regex(/[A-Za-z]/, "Password must contain a letter")
     .regex(/\d/, "Password must contain a number"),
+});
+
+const CODE_MESSAGE = "Enter the 6-digit code from your email";
+
+/** Sign-up when email verification is on. The code is cleaned up first, so "123 456" and "١٢٣٤٥٦" work. */
+export const registerWithCodeSchema = registerSchema.extend({
+  code: z
+    .string({ error: CODE_MESSAGE })
+    .transform(normalizeCode)
+    .pipe(z.string().regex(CODE_FORMAT, CODE_MESSAGE)),
+});
+
+/** Asking for a code only needs the email address. */
+export const sendCodeSchema = z.object({
+  email: z.string({ error: "Enter a valid email address" }).trim().toLowerCase().max(254).pipe(z.email("Enter a valid email address")),
 });
 
 export const loginSchema = z.object({
@@ -136,6 +152,7 @@ export const taskListSchema = z.object({
 export const pageOnlySchema = z.object({ page });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type RegisterWithCodeInput = z.infer<typeof registerWithCodeSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type ProjectInput = z.infer<typeof projectSchema>;
 export type TaskInput = z.infer<typeof taskSchema>;

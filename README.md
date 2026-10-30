@@ -7,7 +7,7 @@ A project health tracker for developers. Create projects, manage tasks on a Kanb
 
 ## Features
 
-- Registration, sign in and sign out (bcrypt password hashing, signed HTTP-only session cookie)
+- Registration with **email verification** (a 6-digit code is emailed and must be entered to create the account), sign in and sign out (bcrypt password hashing, signed HTTP-only session cookie)
 - Projects: create, edit, archive/restore, delete (delete requires typing the project name)
 - Tasks with status, priority, type (task / bug / feature), due date and assignee
 - Kanban board (To Do, In Progress, In Review, Done) with drag and drop and a keyboard-friendly "Move to" menu
@@ -54,9 +54,59 @@ Demo login after seeding: `demo@maplecake.dev` / `demo-password-1` (also `teamma
 | `AUTH_SECRET`  | yes      | Signs session cookies. 32+ random characters: `openssl rand -base64 32` |
 | `APP_URL`      | no       | Public URL of the app (default `http://localhost:3000`) |
 | `CRON_SECRET`  | no       | 16+ characters. Enables `/api/cron/overdue` (Vercel Cron sends it automatically) |
+| `EMAIL_VERIFICATION` | no | `on` (default) or `off`. When on, sign-up needs the emailed code. See section 2a |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | production | The mail server that sends the code (port defaults to 465). Optional in development |
+| `EMAIL_FROM`   | no       | Sender shown in the email, e.g. `Maplecake <you@gmail.com>`. Defaults to `Maplecake <SMTP_USER>` |
 
 All variables are read on the server only. Nothing here uses the `NEXT_PUBLIC_` prefix, so nothing reaches the browser.
 The app validates them with Zod and shows a clear message if one is missing or malformed.
+
+## 2a. Email verification (sign-up codes)
+
+Creating an account takes four fields: name, email, password and a **6-digit verification code**.
+The person clicks **Send code** (it becomes **Resend**) next to the code field, pastes the code from their inbox, and clicks **Sign up**.
+The account only exists after the code is correct, so nobody can register an address they do not own and there are never
+"unverified" accounts to clean up.
+
+**Local development: no setup needed.** With no `SMTP_*` variables the code is printed in the terminal running `npm run dev`
+(look for `[email] SMTP is not configured`). Copy it from there.
+
+**Sending real emails with Gmail** (quickest to start):
+
+1. Turn on 2-Step Verification for the Google account: https://myaccount.google.com/security
+2. Create an App Password: https://myaccount.google.com/apppasswords (a normal Gmail password will NOT work).
+3. Put it in `.env.local`:
+   ```
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=465
+   SMTP_USER=you@gmail.com
+   SMTP_PASS=abcdefghijklmnop
+   ```
+4. Restart `npm run dev`. Gmail allows roughly 500 messages a day; for a real launch use a transactional provider
+   (Resend, Brevo, Postmark, SES ... all of them offer SMTP credentials that go in the same four variables) and a domain you own, so mail does not land in spam.
+
+Set the same variables in Vercel (**Settings > Environment Variables**). In production, sending fails (and the visitor sees
+"We could not send the email") if they are missing; the real reason is in the server log.
+
+**Turning it off.** `EMAIL_VERIFICATION=off` brings back sign-up without a code. Use it for automated tests such as the e2e smoke test,
+which fills the sign-up form without an inbox. Do not use it in production.
+
+How it behaves (all of this is enforced on the server, in the database, so it holds on serverless hosting):
+
+| Rule | Value |
+| ---- | ----- |
+| Code | 6 random digits, valid for **10 minutes** |
+| Storage | Only an HMAC hash (tied to the email and `AUTH_SECRET`) is stored, never the code |
+| Wrong guesses | **5** per code, then the code is dead and a new one is needed. Guesses are counted before they are checked, so parallel requests cannot cheat |
+| Resend | Allowed every **60 seconds**; a new code replaces the old one (only the newest email works) |
+| Hourly limit | **5** codes per email address per hour |
+| One use | The code is consumed in the same transaction that creates the user, so it can never create two accounts |
+| Already registered | The email field says so as soon as you click Send code, and no email is sent |
+| Failed send | If the mail server rejects the message, the database is rolled back: no cooldown starts and the earlier code keeps working |
+| Pasting | `123 456`, `123-456` and non-Latin digits (`١٢٣٤٥٦`, `۱۲۳۴۵۶`) are all accepted |
+| Edited email | A code belongs to the address it was sent to. Change the address and the button goes back to "Send code" |
+| After a mistake | The password you typed stays in the form when the code is wrong (it is never sent back from the server) |
+| Abuse | Also limited to 20 "Send code" requests per 15 minutes per IP address (in memory, best effort) |
 
 ## 3. Database and migrations
 
@@ -70,6 +120,7 @@ The schema lives in `prisma/schema.prisma`; the SQL is in `prisma/migrations/`.
 | `Task` | Status, priority, type, due date, assignee, creator, completion time |
 | `ActivityLog` | Who did what in a project |
 | `Notification` | Per-user in-app notifications with read state |
+| `EmailCode` | Pending sign-up codes: one row per email (hashed code, wrong-guess count, expiry, resend limits). Deleted when the account is created |
 
 Foreign keys cascade sensibly (deleting a project removes its tasks, activity and notifications; deleting a user
 who is a task assignee sets the assignee to empty). Indexes cover the common queries (tasks by project + status,
@@ -139,7 +190,12 @@ npm run build && npm start -- -p 3100      # in one terminal
 BASE=http://localhost:3100 npm run test:e2e   # in another (uses your real DATABASE_URL, creates test users)
 ```
 
-- **Unit tests:** health scoring, permissions, Zod schemas, date handling, rate limiter, pool config.
+The e2e script signs people up through the form, which now needs an emailed code. Start the server it tests with
+`EMAIL_VERIFICATION=off` (for example `EMAIL_VERIFICATION=off npm start -- -p 3100`).
+
+- **Unit tests:** health scoring, permissions, Zod schemas, date handling, rate limiter, pool config, sign-up code generation and
+  hashing, and the verification service (cooldown, hourly cap, expiry, attempt limit, double-click and double-submit races, rollback
+  on a failed send) against an in-memory fake database.
 - **Integration tests (real PostgreSQL):** a stranger gets "not found" for every read and write on someone else's project;
   viewer / member / admin / owner rules; cross-project task access; assignment rules; pagination, search, filter and sort;
   health score and notifications; database CHECK constraints.
@@ -164,9 +220,10 @@ prisma/               schema, migrations, seed script
 src/
   app/                pages and route handlers: (auth) sign in/up, (app) the signed-in product, api/
   components/         ui/ (forms, buttons, badges, gauge), layout/, tasks/ (Kanban), projects/
-  lib/                health score, permissions, dates, constants, db client, auth/ (session, password, token)
+  lib/                health score, permissions, dates, constants, db client, auth/ (session, password, token, email-code)
   server/
     actions/          Server Actions: validate input (Zod) -> call a service -> refresh/redirect
+    email/            send.ts (SMTP) and templates.ts (the verification email)
     services/         business rules and writes; every function takes the acting userId
     queries/          reads (lists, dashboard, health)
     access.ts         requireMembership(): the one gate for project data
@@ -192,11 +249,17 @@ tests/                unit, integration, e2e
   - The login rate limiter is in memory, so on serverless hosting each instance counts separately. For strict limits add a
     shared store (e.g. Redis) or a WAF rule.
   - Registration tells you when an email is already taken (a common usability trade-off).
-  - There is no email verification or password reset yet.
+  - Email addresses are verified at sign-up, but there is no password reset yet (the same code mechanism can be reused for it).
+  - The "Send code" limit per IP address is in memory (like the login limiter). The per-email cooldown, hourly cap and attempt limit live in the database and are exact.
   - `Secure` cookies and Safari: Safari does not store `Secure` cookies on plain `http://localhost` when running `npm start`. Use `npm run dev`
     or Chrome/Firefox for local production-mode testing.
 
 ## Troubleshooting
+
+- **No verification email arrives:** check the spam folder; check the server log for `Could not send the verification email` (wrong `SMTP_PASS`,
+  or a normal Gmail password instead of an App Password); with no `SMTP_*` set in development the code is in the `npm run dev` terminal.
+- **"We could not send the email" in production:** `SMTP_HOST`, `SMTP_USER` or `SMTP_PASS` is missing in the host's environment variables.
+- **Table `EmailCode` does not exist:** run `npm run db:deploy` to apply the new migration.
 
 - **"Invalid environment variables"**: the message names the variable. Check `.env.local`.
 - **`P1001` / can't reach database**: check the password (URL-encode special characters) and that you used the pooler hostname from the Connect dialog.

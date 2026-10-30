@@ -1,4 +1,4 @@
-export type AppErrorCode = "NOT_FOUND" | "FORBIDDEN" | "VALIDATION" | "CONFLICT" | "RATE_LIMITED";
+export type AppErrorCode = "NOT_FOUND" | "FORBIDDEN" | "VALIDATION" | "CONFLICT" | "RATE_LIMITED" | "UNAVAILABLE";
 
 /** An error whose message is safe to show to the person using the app. */
 export class AppError extends Error {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState, type ReactNode } from "react";
 import { useFormMeta } from "./ActionForm";
 import { DatePicker } from "./DatePicker";
 import { Select } from "./Select";
@@ -25,9 +25,15 @@ type Props = {
   labelHidden?: boolean;
   /** Called with the new text whenever the person types. */
   onValueChange?: (value: string) => void;
+  /** Shows this error instead of the one from the last form submit. Pass "" to show none. */
+  error?: string;
+  /** A small control drawn inside the right end of a text or email field (for example a "Resend" button). */
+  trailing?: ReactNode;
+  /** Which on-screen keyboard phones show. */
+  inputMode?: "text" | "numeric" | "email";
 };
 
-export function Field({ name, label, type = "text", defaultValue, options, required, hint, autoComplete, disabled, maxLength, placeholder, autoFocus, labelHidden, onValueChange }: Props) {
+export function Field({ name, label, type = "text", defaultValue, options, required, hint, autoComplete, disabled, maxLength, placeholder, autoFocus, labelHidden, onValueChange, error: errorProp, trailing, inputMode }: Props) {
   const id = useId();
   const { state } = useFormMeta();
   const [revealed, setRevealed] = useState(false);
@@ -41,7 +47,7 @@ export function Field({ name, label, type = "text", defaultValue, options, requi
     },
     [autoFocus],
   );
-  const error = state.fieldErrors?.[name];
+  const error = errorProp !== undefined ? errorProp || undefined : state.fieldErrors?.[name];
   // After a failed submit, show what the person typed instead of the original value.
   const value = state.values?.[name] ?? defaultValue;
   // New key after each result so the input picks up the new default value.
@@ -71,14 +77,19 @@ export function Field({ name, label, type = "text", defaultValue, options, requi
         <DatePicker key={key} id={id} name={name} defaultValue={value} invalid={Boolean(error)} disabled={disabled} aria-describedby={describedBy} />
       ) : type === "password" ? (
         <div className={styles.passwordWrap}>
-          <input key={key} {...common} type={revealed ? "text" : "password"} autoComplete={autoComplete} maxLength={maxLength} autoCapitalize="none" autoCorrect="off" spellCheck={false} />
+          <input key={key} {...common} type={revealed ? "text" : "password"} defaultValue={value} autoComplete={autoComplete} maxLength={maxLength} autoCapitalize="none" autoCorrect="off" spellCheck={false} onChange={(e) => onValueChange?.(e.target.value)} />
           <button type="button" className={styles.reveal} aria-pressed={revealed} onClick={() => setRevealed((v) => !v)}>
             <i className={revealed ? "ri-eye-off-line" : "ri-eye-line"} aria-hidden="true" />
             <span className="visually-hidden">{revealed ? "Hide password" : "Show password"}</span>
           </button>
         </div>
+      ) : trailing ? (
+        <div className={styles.trailingWrap}>
+          <input key={key} ref={focusOnce} {...common} type={type} defaultValue={value} autoComplete={autoComplete} maxLength={maxLength} placeholder={placeholder} inputMode={inputMode} autoCapitalize="none" autoCorrect="off" spellCheck={false} onChange={(e) => onValueChange?.(e.target.value)} />
+          {trailing}
+        </div>
       ) : (
-        <input key={key} ref={focusOnce} {...common} type={type} defaultValue={value} autoComplete={autoComplete} maxLength={maxLength} placeholder={placeholder} autoCapitalize={type === "email" ? "none" : undefined} autoCorrect={type === "email" ? "off" : undefined} spellCheck={type === "email" ? false : undefined} onChange={(e) => onValueChange?.(e.target.value)} />
+        <input key={key} ref={focusOnce} {...common} type={type} defaultValue={value} autoComplete={autoComplete} maxLength={maxLength} placeholder={placeholder} inputMode={inputMode} autoCapitalize={type === "email" ? "none" : undefined} autoCorrect={type === "email" ? "off" : undefined} spellCheck={type === "email" ? false : undefined} onChange={(e) => onValueChange?.(e.target.value)} />
       )}
       {hint && (
         <p id={`${id}-hint`} className={styles.hint}>
