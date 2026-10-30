@@ -36,7 +36,7 @@ export default async function HomePage() {
       <header className={styles.nav}>
         <div className={styles.navInner}>
           <Link href="/" className={styles.brand}>
-            <BrandLogo size="2.5rem" />
+            <BrandLogo size="var(--logo, 2.5rem)" />
           </Link>
           <nav className={styles.links} aria-label="Sections">
             <a href="#health">Health score</a>

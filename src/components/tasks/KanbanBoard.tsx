@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useOptimistic, useState, useTransition } from "react";
+import { useOptimistic, useState, useSyncExternalStore, useTransition } from "react";
 import { PriorityBadge, TypeBadge } from "@/components/ui/Badges";
 import { useDialogs } from "@/components/ui/DialogProvider";
 import { Select } from "@/components/ui/Select";
@@ -24,6 +24,16 @@ export type BoardTask = {
 const STATUS_ICON: Record<TaskStatus, string> = { TODO: "ri-circle-line", IN_PROGRESS: "ri-loader-line", IN_REVIEW: "ri-eye-line", DONE: "ri-check-double-line" };
 const MOVE_OPTIONS = TASK_STATUSES.map((s) => ({ value: s, label: STATUS_LABEL[s], icon: STATUS_ICON[s] }));
 
+// Touch screens: long-press dragging competes with scrolling the board sideways, so cards are moved with the "Move to" menu instead.
+const touchQuery = "(pointer: coarse)";
+const subscribeTouch = (notify: () => void) => {
+  const query = window.matchMedia(touchQuery);
+  query.addEventListener("change", notify);
+  return () => query.removeEventListener("change", notify);
+};
+const isTouch = () => window.matchMedia(touchQuery).matches;
+const notTouch = () => false;
+
 type Props = { projectId: string; tasks: BoardTask[]; canEdit: boolean; hiddenDone: number };
 
 export function KanbanBoard({ projectId, tasks, canEdit, hiddenDone }: Props) {
@@ -34,6 +44,8 @@ export function KanbanBoard({ projectId, tasks, canEdit, hiddenDone }: Props) {
   const [, startTransition] = useTransition();
   const [dragId, setDragId] = useState<string | null>(null);
   const [overColumn, setOverColumn] = useState<TaskStatus | null>(null);
+  const touch = useSyncExternalStore(subscribeTouch, isTouch, notTouch);
+  const canDrag = canEdit && !touch;
 
   function move(taskId: string, status: TaskStatus) {
     const task = items.find((t) => t.id === taskId);
@@ -52,7 +64,7 @@ export function KanbanBoard({ projectId, tasks, canEdit, hiddenDone }: Props) {
   return (
     <>
       {canEdit ? (
-        <p className={styles.help}><i className="ri-drag-move-2-line" aria-hidden="true" /> Drag a card to another column, or use the “Move to” menu on a card.</p>
+        <p className={styles.help}><i className="ri-drag-move-2-line" aria-hidden="true" /> {touch ? "Use the “Move to” menu on a card to change its column." : "Drag a card to another column, or use the “Move to” menu on a card."}</p>
       ) : (
         <p className={styles.help}><i className="ri-lock-line" aria-hidden="true" /> You have read-only access, so cards cannot be moved.</p>
       )}
@@ -65,7 +77,7 @@ export function KanbanBoard({ projectId, tasks, canEdit, hiddenDone }: Props) {
               aria-labelledby={`col-${status}`}
               className={`${styles.column} ${styles[`c_${status}`]} ${overColumn === status ? styles.columnOver : ""}`}
               onDragOver={(e) => {
-                if (!canEdit) return;
+                if (!canDrag) return;
                 e.preventDefault();
                 setOverColumn(status);
               }}
@@ -92,8 +104,8 @@ export function KanbanBoard({ projectId, tasks, canEdit, hiddenDone }: Props) {
                     return (
                       <li
                         key={task.id}
-                        className={`${styles.card} ${canEdit ? styles.draggable : ""} ${dragId === task.id ? styles.dragging : ""}`}
-                        draggable={canEdit}
+                        className={`${styles.card} ${canDrag ? styles.draggable : ""} ${dragId === task.id ? styles.dragging : ""}`}
+                        draggable={canDrag}
                         onDragStart={(e) => {
                           e.dataTransfer.setData("text/plain", task.id);
                           e.dataTransfer.effectAllowed = "move";

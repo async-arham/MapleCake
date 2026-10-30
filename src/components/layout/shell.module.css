@@ -1,7 +1,7 @@
-.shell { min-height: 100vh; display: grid; grid-template-columns: 17rem minmax(0, 1fr); background: var(--app-bg); }
+.shell { min-height: 100vh; min-height: 100dvh; display: grid; grid-template-columns: 17rem minmax(0, 1fr); background: var(--app-bg); }
 
 /* ---------- sidebar ---------- */
-.sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 1.6rem; padding: 1.5rem 1rem 1.25rem; background: #fff; overflow-y: auto; }
+.sidebar { position: sticky; top: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.6rem; padding: 1.5rem 1rem 1.25rem; background: #fff; overflow-y: auto; }
 .brand { display: flex; align-items: center; gap: 0.7rem; padding: 0.25rem 0.6rem; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em; color: var(--ink); text-decoration: none; }
 .logo { display: grid; place-items: center; font-size: 2.6rem; line-height: 0; }
 .nav { display: grid; gap: 0.25rem; }
@@ -10,6 +10,7 @@
 .navLink > i, .navLink > span:first-child { font-size: 1.5rem; }
 .navLink:hover { background: #f6f7fa; }
 .navActive, .navActive:hover { background: #f1f2f6; font-weight: 700; }
+.navShort { display: none; }
 .count { margin-left: auto; min-width: 1.4rem; text-align: center; background: var(--red); color: #fff; font-size: 0.72rem; font-weight: 800; padding: 0.12rem 0.5rem; border-radius: var(--pill); }
 .tip { margin-top: auto; border-radius: 20px; background: var(--yellow-soft); padding: 1.1rem 1.1rem 1.2rem; display: grid; gap: 0.5rem; font-size: 0.88rem; line-height: 1.45; }
 .tip strong { font-size: 0.95rem; }
@@ -45,19 +46,49 @@
 .pageHeader h1 { font-size: clamp(2rem, 3.6vw, 2.8rem); letter-spacing: -0.035em; }
 .pageHeader p { color: var(--ink-soft); margin-top: 0.4rem; font-size: 1.08rem; }
 
-/* ---------- phones: sidebar becomes a bottom tab bar ---------- */
+/* ---------- phones and small tablets: the sidebar becomes a bottom tab bar ---------- */
 @media (max-width: 56rem) {
   .shell { grid-template-columns: minmax(0, 1fr); }
-  .sidebar { position: fixed; z-index: 50; inset: auto 0 0 0; height: auto; flex-direction: row; padding: 0.4rem 0.5rem calc(0.4rem + env(safe-area-inset-bottom)); gap: 0; border-top: 1px solid #e6e8ee; overflow: visible; }
+  .sidebar { position: fixed; z-index: 50; inset: auto 0 0 0; height: auto; flex-direction: row; padding: 0.35rem 0.4rem calc(0.35rem + env(safe-area-inset-bottom)); gap: 0; background: rgba(255, 255, 255, 0.97); border-top: 1px solid #e6e8ee; box-shadow: 0 -8px 24px rgba(13, 12, 34, 0.05); overflow: visible; }
   .sidebar .brand, .sidebar .navLabel, .sidebar .tip, .sidebar .newBtn { display: none; }
-  .nav { grid-auto-flow: column; grid-auto-columns: 1fr; width: 100%; }
-  .navLink { flex-direction: column; gap: 0.15rem; padding: 0.5rem 0.25rem; font-size: 0.7rem; text-align: center; position: relative; }
-  .count { position: absolute; top: 0.2rem; left: 55%; margin: 0; }
-  .mobileBrand { display: inline-flex; }
-  .main { padding-bottom: 8rem; }
-  .help { bottom: 5.6rem; right: 1rem; }
+  /* while typing, the on-screen keyboard must not push the tab bar over the form */
+  .shell:has(input:focus, textarea:focus) .sidebar { display: none; }
+  .nav { grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); width: 100%; gap: 0.1rem; }
+  .navLink { position: relative; min-width: 0; flex-direction: column; justify-content: center; gap: 0.15rem; padding: 0.45rem 0.1rem 0.4rem; font-size: 0.68rem; line-height: 1.2; text-align: center; border-radius: 14px; }
+  /* the label never wraps or breaks mid-word; long names use their short form */
+  .navText { display: block; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; overflow-wrap: normal; }
+  .navFull { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .navShort { display: inline; }
+  .count { position: absolute; top: 0.1rem; left: 52%; margin: 0; min-width: 1.15rem; padding: 0.05rem 0.38rem; font-size: 0.64rem; }
+
+  .mobileBrand { display: inline-flex; --logo: 2.2rem; }
+  .topbar { padding: 0.9rem clamp(1rem, 4vw, 3rem) 0; gap: 0.6rem; }
+  .topActions { gap: 0.5rem; }
+  .bell, .userPill { height: 2.9rem; }
+  .bell { width: 2.9rem; font-size: 1.3rem; }
+  .bellDot { top: 0.7rem; right: 0.75rem; }
+  .userPill { gap: 0.55rem; padding: 0 0.35rem 0 0.9rem; font-size: 1.3rem; }
+  .avatar { width: 2.2rem; height: 2.2rem; }
+  .userMenu { width: min(17rem, calc(100vw - 2rem)); }
+
+  .main { padding: 1.1rem clamp(1rem, 4vw, 3rem) calc(6.6rem + env(safe-area-inset-bottom)); }
+  .pageHeader { margin-bottom: 1.35rem; gap: 0.75rem; }
+  .pageHeader p { font-size: 1rem; }
+
+  /* the round "?" would sit on top of content and tab bar, so on phones it lives in the account menu */
+  .help { display: none; }
+  .menuHelp { display: flex; }
+}
+@media (max-width: 30rem) {
+  .mobileBrand { --logo: 2rem; }
+  .main { padding-inline: 1rem; }
+}
+@media (max-width: 22rem) {
+  .mobileBrand { --logo: 1.75rem; }
+  .bell { display: none; } /* the Alerts tab is always in the bottom bar */
 }
 .userMenu[hidden] { display: none; }
+.menuHelp { display: none; }
 
 .countYellow { background: var(--yellow); color: var(--ink); }
 .menuItem .count { margin-left: auto; }

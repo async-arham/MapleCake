@@ -25,11 +25,11 @@ export function AuthFrame({ switchText, switchHref, switchLabel, children }: Pro
       <section className={styles.panel}>
         <div className={styles.topbar}>
           <Link href="/" className={styles.mobileBrand}>
-            <BrandLogo size="2.4rem" />
+            <BrandLogo size="var(--logo, 2.4rem)" />
           </Link>
           <div className={styles.topRight}>
             <p>
-              {switchText} <Link href={switchHref}>{switchLabel}</Link>
+              <span className={styles.switchText}>{switchText}</span> <Link href={switchHref}>{switchLabel}</Link>
             </p>
             <GithubLink />
           </div>

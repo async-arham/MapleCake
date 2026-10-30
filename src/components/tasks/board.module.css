@@ -26,3 +26,9 @@
 .emptyCol i { font-size: 1.8rem; }
 .note { font-size: 0.85rem; color: var(--ink-soft); margin-top: var(--space-2); }
 .help { display: flex; gap: 0.5rem; align-items: center; font-size: 0.92rem; font-weight: 600; color: var(--ink-soft); margin-bottom: var(--space-4); }
+
+@media (max-width: 56rem) {
+  /* one column at a time, with the next one peeking in so it is clear the board scrolls sideways */
+  .board { grid-template-columns: repeat(4, minmax(min(82vw, 18rem), 1fr)); scroll-snap-type: x proximity; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+  .column { scroll-snap-align: start; padding: 0.85rem; min-height: 12rem; }
+}

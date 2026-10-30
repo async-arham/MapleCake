@@ -33,7 +33,7 @@ export default async function TeamPage({ params }: { params: Promise<{ projectId
       <section aria-labelledby="members-title">
         <h2 id="members-title" style={{ fontSize: "1.4rem", marginBottom: "0.9rem" }}>Team members</h2>
         <div className={ui.tableWrap}>
-          <table className={ui.table}>
+          <table className={`${ui.table} ${ui.tableStack}`}>
             <thead>
               <tr>
                 <th scope="col">Name</th>
@@ -48,9 +48,9 @@ export default async function TeamPage({ params }: { params: Promise<{ projectId
                 const manageable = !isSelf && canManageMember(role, m.role);
                 return (
                   <tr key={m.id}>
-                    <td>{m.user.name}{isSelf ? " (you)" : ""}</td>
-                    <td>{m.user.email}</td>
-                    <td>
+                    <td data-title>{m.user.name}{isSelf ? " (you)" : ""}</td>
+                    <td data-label="Email">{m.user.email}</td>
+                    <td data-label="Role">
                       {manageable ? (
                         <ActionForm action={changeRoleAction} inline requireChange>
                           <input type="hidden" name="projectId" value={project.id} />
@@ -64,7 +64,7 @@ export default async function TeamPage({ params }: { params: Promise<{ projectId
                         <RoleBadge value={m.role} />
                       )}
                     </td>
-                    <td>
+                    <td data-label="" data-end>
                       {(manageable || (isSelf && m.role !== "OWNER")) && (
                         <ActionForm action={removeMemberAction} inline>
                           <input type="hidden" name="projectId" value={project.id} />

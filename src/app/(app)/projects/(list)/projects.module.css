@@ -1,4 +1,4 @@
-.grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr)); }
+.grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr)); }
 .card { position: relative; display: grid; gap: 1rem; background: #fff; border-radius: var(--radius-lg); padding: 1.5rem; text-decoration: none; color: var(--ink); transition: box-shadow 0.2s; }
 .card:hover { box-shadow: 0 12px 32px rgba(13, 12, 34, 0.1); }
 .cardTop { display: flex; gap: 1rem; align-items: center; }

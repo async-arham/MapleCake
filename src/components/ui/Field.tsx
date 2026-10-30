@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import { useFormMeta } from "./ActionForm";
 import { DatePicker } from "./DatePicker";
 import { Select } from "./Select";
@@ -31,6 +31,16 @@ export function Field({ name, label, type = "text", defaultValue, options, requi
   const id = useId();
   const { state } = useFormMeta();
   const [revealed, setRevealed] = useState(false);
+  // autoFocus is ignored on touch screens: it would open the on-screen keyboard over half the page before anyone has read it.
+  const focused = useRef(false);
+  const focusOnce = useCallback(
+    (element: HTMLInputElement | HTMLTextAreaElement | null) => {
+      if (!element || !autoFocus || focused.current) return;
+      focused.current = true;
+      if (!window.matchMedia("(pointer: coarse)").matches) element.focus();
+    },
+    [autoFocus],
+  );
   const error = state.fieldErrors?.[name];
   // After a failed submit, show what the person typed instead of the original value.
   const value = state.values?.[name] ?? defaultValue;
@@ -42,7 +52,6 @@ export function Field({ name, label, type = "text", defaultValue, options, requi
     name,
     required,
     disabled,
-    autoFocus,
     "aria-invalid": error ? true : undefined,
     "aria-describedby": describedBy,
     className: `${styles.input} ${error ? styles.invalid : ""}`,
@@ -55,21 +64,21 @@ export function Field({ name, label, type = "text", defaultValue, options, requi
         {required && !labelHidden ? <span aria-hidden="true"> *</span> : null}
       </label>
       {type === "textarea" ? (
-        <textarea key={key} {...common} defaultValue={value} maxLength={maxLength} placeholder={placeholder} onChange={(e) => onValueChange?.(e.target.value)} />
+        <textarea key={key} ref={focusOnce} {...common} defaultValue={value} maxLength={maxLength} placeholder={placeholder} onChange={(e) => onValueChange?.(e.target.value)} />
       ) : type === "select" ? (
-        <Select key={key} id={id} name={name} options={options ?? []} defaultValue={value} invalid={Boolean(error)} disabled={disabled} autoFocus={autoFocus} aria-describedby={describedBy} />
+        <Select key={key} id={id} name={name} options={options ?? []} defaultValue={value} invalid={Boolean(error)} disabled={disabled} aria-describedby={describedBy} />
       ) : type === "date" ? (
-        <DatePicker key={key} id={id} name={name} defaultValue={value} invalid={Boolean(error)} disabled={disabled} autoFocus={autoFocus} aria-describedby={describedBy} />
+        <DatePicker key={key} id={id} name={name} defaultValue={value} invalid={Boolean(error)} disabled={disabled} aria-describedby={describedBy} />
       ) : type === "password" ? (
         <div className={styles.passwordWrap}>
-          <input key={key} {...common} type={revealed ? "text" : "password"} autoComplete={autoComplete} maxLength={maxLength} />
+          <input key={key} {...common} type={revealed ? "text" : "password"} autoComplete={autoComplete} maxLength={maxLength} autoCapitalize="none" autoCorrect="off" spellCheck={false} />
           <button type="button" className={styles.reveal} aria-pressed={revealed} onClick={() => setRevealed((v) => !v)}>
             <i className={revealed ? "ri-eye-off-line" : "ri-eye-line"} aria-hidden="true" />
             <span className="visually-hidden">{revealed ? "Hide password" : "Show password"}</span>
           </button>
         </div>
       ) : (
-        <input key={key} {...common} type={type} defaultValue={value} autoComplete={autoComplete} maxLength={maxLength} placeholder={placeholder} onChange={(e) => onValueChange?.(e.target.value)} />
+        <input key={key} ref={focusOnce} {...common} type={type} defaultValue={value} autoComplete={autoComplete} maxLength={maxLength} placeholder={placeholder} autoCapitalize={type === "email" ? "none" : undefined} autoCorrect={type === "email" ? "off" : undefined} spellCheck={type === "email" ? false : undefined} onChange={(e) => onValueChange?.(e.target.value)} />
       )}
       {hint && (
         <p id={`${id}-hint`} className={styles.hint}>

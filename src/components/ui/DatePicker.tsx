@@ -102,7 +102,11 @@ export function DatePicker({ name, id, defaultValue = "", value: controlled, onC
     const onScroll = (event: Event) => {
       if (!panelRef.current?.contains(event.target as Node)) closePanel();
     };
-    const onResize = () => closePanel();
+    // Phones fire "resize" when the address bar slides away or the keyboard opens. Only a width change (rotation) should close the panel.
+    const startWidth = window.innerWidth;
+    const onResize = () => {
+      if (window.innerWidth !== startWidth) closePanel();
+    };
     document.addEventListener("pointerdown", onDown);
     window.addEventListener("scroll", onScroll, true);
     window.addEventListener("resize", onResize);

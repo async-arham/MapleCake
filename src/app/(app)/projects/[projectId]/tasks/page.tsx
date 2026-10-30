@@ -104,28 +104,28 @@ export default async function TasksPage({
       ) : (
         <>
           <div className={ui.tableWrap}>
-            <table className={ui.table}>
-              <thead>
+            <table className={`${ui.table} ${ui.tableStack}`}>
+              <thead className={ui.sortBar}>
                 <tr>
-                  <th scope="col">{sortLink("title", "Title")}</th>
+                  <th scope="col" data-sort>{sortLink("title", "Title")}</th>
                   <th scope="col">Type</th>
                   <th scope="col">Status</th>
-                  <th scope="col">{sortLink("priority", "Priority")}</th>
-                  <th scope="col">{sortLink("due", "Due")}</th>
+                  <th scope="col" data-sort>{sortLink("priority", "Priority")}</th>
+                  <th scope="col" data-sort>{sortLink("due", "Due")}</th>
                   <th scope="col">Assignee</th>
                 </tr>
               </thead>
               <tbody>
                 {tasks.map((t) => (
                   <tr key={t.id}>
-                    <td><Link href={`${base}/${t.id}`}>{t.title}</Link></td>
-                    <td><TypeBadge value={t.type} /></td>
-                    <td><StatusBadge value={t.status} /></td>
-                    <td><PriorityBadge value={t.priority} /></td>
-                    <td>
+                    <td data-title><Link href={`${base}/${t.id}`}>{t.title}</Link></td>
+                    <td data-label="Type"><TypeBadge value={t.type} /></td>
+                    <td data-label="Status"><StatusBadge value={t.status} /></td>
+                    <td data-label="Priority"><PriorityBadge value={t.priority} /></td>
+                    <td data-label="Due">
                       {t.dueDate ? formatDate(t.dueDate) : "-"} {t.status !== "DONE" && isOverdue(t) && <OverdueBadge />}
                     </td>
-                    <td>{t.assignee?.name ?? "Unassigned"}</td>
+                    <td data-label="Assignee">{t.assignee?.name ?? "Unassigned"}</td>
                   </tr>
                 ))}
               </tbody>

@@ -6,6 +6,7 @@ import { initials } from "@/lib/dates";
 import { useLive } from "./LiveProvider";
 import styles from "./shell.module.css";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { HELP_EVENT } from "./HelpButton";
 
 type Props = { user: { name: string; email: string }; signOut: ReactNode };
 
@@ -33,7 +34,7 @@ export function TopBar({ user, signOut }: Props) {
   return (
     <header className={styles.topbar}>
       <Link href="/dashboard" className={styles.mobileBrand}>
-        <BrandLogo size="2.4rem" />
+        <BrandLogo size="var(--logo, 2.4rem)" />
       </Link>
       <div className={styles.topActions}>
         <Link href="/notifications" className={styles.bell} aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}>
@@ -75,6 +76,17 @@ export function TopBar({ user, signOut }: Props) {
               <Link href="/notifications" role="menuitem" className={styles.menuItem} onClick={() => setOpen(false)}>
                 <i className="ri-notification-3-line" aria-hidden="true" /> Notifications
               </Link>
+              <button
+                type="button"
+                role="menuitem"
+                className={`${styles.menuItem} ${styles.menuHelp}`}
+                onClick={() => {
+                  setOpen(false);
+                  window.dispatchEvent(new Event(HELP_EVENT));
+                }}
+              >
+                <i className="ri-question-line" aria-hidden="true" /> How health scores work
+              </button>
               {signOut}
             </div>
           }

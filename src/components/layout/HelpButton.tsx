@@ -1,15 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DuoIcon } from "@/components/ui/DuoIcon";
 import { Modal } from "@/components/ui/Modal";
 import ui from "@/components/ui/ui.module.css";
 import { CRITICAL_BUG_CAP, CRITICAL_BUG_POINTS, OVERDUE_CAP, OVERDUE_WEIGHT } from "@/lib/health";
 import styles from "./shell.module.css";
 
-/** The round "?" button at the bottom right. Opens a short guide to the health score. */
+/** Fired by the account menu on phones, where the round "?" button is hidden. */
+export const HELP_EVENT = "maplecake:help";
+
+/** The round "?" button at the bottom right (desktop). Opens a short guide to the health score. */
 export function HelpButton() {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const show = () => setOpen(true);
+    window.addEventListener(HELP_EVENT, show);
+    return () => window.removeEventListener(HELP_EVENT, show);
+  }, []);
   return (
     <>
       <button type="button" className={styles.help} aria-label="Help: how the health score works" onClick={() => setOpen(true)}>

@@ -8,12 +8,13 @@ import ui from "@/components/ui/ui.module.css";
 import styles from "./shell.module.css";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
-const links = [
-  { href: "/profile", label: "Profile", icon: "user-3" },
+// `short` is the label used in the phone tab bar, where five tabs share a narrow screen.
+const links: { href: string; label: string; icon: string; short?: string }[] = [
   { href: "/dashboard", label: "Dashboard", icon: "dashboard-3" },
   { href: "/projects", label: "Projects", icon: "folder-3" },
-  { href: "/invitations", label: "Invitations", icon: "mail-send" },
-  { href: "/notifications", label: "Notifications", icon: "notification-3" },
+  { href: "/invitations", label: "Invitations", icon: "mail-send", short: "Invites" },
+  { href: "/notifications", label: "Notifications", icon: "notification-3", short: "Alerts" },
+  { href: "/profile", label: "Profile", icon: "user-3" },
 ];
 
 export function Sidebar() {
@@ -36,7 +37,16 @@ export function Sidebar() {
           return (
             <Link key={link.href} href={link.href} aria-current={isActive ? "page" : undefined} className={`${styles.navLink} ${isActive ? styles.navActive : ""}`}>
               {isActive ? <DuoIcon name={link.icon} size="1.5rem" /> : <i className={`ri-${link.icon}-line`} aria-hidden="true" />}
-              {link.label}
+              <span className={styles.navText}>
+                {link.short ? (
+                  <>
+                    <span className={styles.navFull}>{link.label}</span>
+                    <span className={styles.navShort} aria-hidden="true">{link.short}</span>
+                  </>
+                ) : (
+                  link.label
+                )}
+              </span>
               {link.href === "/notifications" && unread > 0 && (
                 <span className={styles.count} aria-label={`${unread} unread`}>
                   {unread > 99 ? "99+" : unread}

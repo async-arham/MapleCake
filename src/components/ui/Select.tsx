@@ -111,7 +111,11 @@ export function Select({ options, name, id, defaultValue, value: controlled, onC
     const onScroll = (event: Event) => {
       if (!menuRef.current?.contains(event.target as Node)) closeMenu();
     };
-    const onResize = () => closeMenu();
+    // Phones fire "resize" when the address bar slides away or the keyboard opens. Only a width change (rotation) should close the menu.
+    const startWidth = window.innerWidth;
+    const onResize = () => {
+      if (window.innerWidth !== startWidth) closeMenu();
+    };
     document.addEventListener("pointerdown", onDown);
     window.addEventListener("scroll", onScroll, true);
     window.addEventListener("resize", onResize);

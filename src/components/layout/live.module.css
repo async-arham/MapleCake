@@ -1,4 +1,4 @@
-.stack { position: fixed; z-index: 150; top: 1rem; right: 1rem; display: grid; gap: 0.7rem; width: min(24rem, calc(100vw - 2rem)); pointer-events: none; }
+.stack { position: fixed; z-index: 150; top: calc(1rem + env(safe-area-inset-top, 0px)); right: 1rem; display: grid; gap: 0.7rem; width: min(24rem, calc(100vw - 2rem)); pointer-events: none; }
 .toast { position: relative; display: flex; gap: 0.9rem; align-items: flex-start; padding: 1rem 2.6rem 1rem 1.1rem; background: #fff; border-radius: 22px; box-shadow: 0 18px 44px rgba(13, 12, 34, 0.2); text-decoration: none; color: var(--ink); pointer-events: auto; animation: toastSlide 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.1) both; }
 .toast:hover { box-shadow: 0 18px 44px rgba(13, 12, 34, 0.28); }
 .toastOut { animation: toastAway 0.25s ease-in both; }
