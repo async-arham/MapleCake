@@ -55,7 +55,7 @@
 .mcard { position: relative; z-index: 2; background: #fff; border-radius: 1.75rem; box-shadow: var(--shadow-lg); padding: 1.5rem; text-align: left; width: min(100%, 28rem); }
 .mHead { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.2rem; }
 .mTitle { font-weight: 800; font-size: 1.1rem; }
-.mBadge { margin-left: auto; font-size: 0.75rem; font-weight: 800; background: var(--tint-orange); color: #9a4a06; padding: 0.25rem 0.7rem; border-radius: var(--pill); }
+.mBadge { margin-left: auto; font-size: 0.75rem; font-weight: 800; background: var(--tint-orange); color: #9a4a06; padding: 0.25rem 0.7rem; border-radius: var(--pill); white-space: nowrap;}
 .mBody { display: flex; gap: 1.25rem; align-items: center; }
 .factors { display: grid; gap: 0.5rem; flex: 1; }
 .factor { display: flex; justify-content: space-between; gap: 0.5rem; background: var(--cream); border-radius: 0.8rem; padding: 0.55rem 0.8rem; font-size: 0.82rem; font-weight: 700; }
