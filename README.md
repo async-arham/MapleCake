@@ -1,267 +1,107 @@
-# Maplecake
+<p align="center">
+  <img src="src/app/icon.svg" width="76" alt="MapleCake logo">
+</p>
 
-A project health tracker for developers. Create projects, manage tasks on a Kanban board, and see a
-**0-100 health score** for every project with a plain-English explanation and suggested next steps.
+<h1 align="center">MapleCake</h1>
 
-**Stack:** Next.js 16 (App Router) · TypeScript · PostgreSQL on Supabase · Prisma 6 · Zod · hand-written CSS Modules (no CSS framework)
+<p align="center"><strong>Know which projects are slipping before they ship late.</strong></p>
 
-## Features
+<p align="center">
+  <a href="https://maplecake.vercel.app/">Open MapleCake</a> ·
+  <a href="#how-the-health-score-works">Health score</a> ·
+  <a href="#run-locally">Run locally</a>
+</p>
 
-- Registration with **email verification** (a 6-digit code is emailed and must be entered to create the account), sign in and sign out (bcrypt password hashing, signed HTTP-only session cookie)
-- Projects: create, edit, archive/restore, delete (delete requires typing the project name)
-- Tasks with status, priority, type (task / bug / feature), due date and assignee
-- Kanban board (To Do, In Progress, In Review, Done) with drag and drop and a keyboard-friendly "Move to" menu
-- Dashboard: active projects, open / completed / overdue tasks, average health, per-project health, charts
-- Health score with explanation and suggested actions (see below)
-- Team members with roles (Owner, Admin, Member, Viewer), activity history, in-app notifications
-- Profile page: edit your name, change your password, delete your account (see below)
-- Search, filters, sorting and pagination on projects and tasks
-- Loading, empty and error states on every page
+MapleCake is a project health tracker for student developers, hackathon teams, and small software teams. It turns overdue work and unresolved critical bugs into a **0–100 health score** and shows which tasks lowered it and what to fix first.
 
-## Quick start
+**Every feature is free for every team.**
 
-Requires Node.js 20.9+ and a Supabase account (free tier is fine).
+## What you can do
 
-```bash
-npm install
-cp .env.example .env.local      # used by `next dev`
-cp .env.example .env            # used by Prisma commands and the seed script
-# fill in the values (see "Environment variables"), then:
-npm run db:deploy               # creates the tables in Supabase
-npm run db:seed                 # optional demo data
-npm run dev                     # http://localhost:3000
-```
+| Feature | What it does |
+| --- | --- |
+| **Dashboard** | See project health, open and completed work, overdue tasks, and task trends across projects. |
+| **Project health** | Open a project to see its score, the tasks behind each deduction, and suggested next steps. |
+| **Kanban board** | Drag tasks across To Do, In Progress, In Review, and Done, or use the keyboard-friendly **Move to** menu. |
+| **Task list** | Track tasks, bugs, and features by assignee, priority, due date, and status. Search and filter the list. |
+| **Teams and invitations** | Invite teammates to private projects and manage access with Owner, Admin, Member, and Viewer roles. |
+| **Activity and notifications** | See who changed what and get in-app updates for assignments, overdue work, team changes, and health alerts. |
 
-Demo login after seeding: `demo@maplecake.dev` / `demo-password-1` (also `teammate@maplecake.dev`).
+## How the health score works
 
-## 1. Create the Supabase database
+Every project starts at **100**.
 
-1. Go to https://supabase.com, create a project, and save the **database password** you choose.
-2. Click **Connect** at the top of the dashboard and copy two connection strings:
-   - **Transaction pooler** (port **6543**) -> `DATABASE_URL`. Append `?pgbouncer=true`.
-   - **Session pooler** (port **5432**) or **Direct connection** -> `DIRECT_URL`.
-3. Replace `[YOUR-PASSWORD]` in both. If the password contains special characters, URL-encode them (`@` becomes `%40`).
+| Signal | Deduction |
+| --- | --- |
+| Open work past its due date | Low **−2**, medium **−4**, high **−6**, critical **−10** per item. More than seven days late adds 50%. Total deduction capped at 55. |
+| Unresolved critical bugs | **−15** per bug, capped at 45. |
 
-> Why two URLs? The running app uses the pooled URL, which copes with many short serverless
-> connections. Prisma migrations need a normal session, so they use the direct/session URL.
+Due dates are evaluated in UTC. **80–100** is Healthy, **60–79** is Needs watching, **40–59** is At risk, and **0–39** is Critical. When a change takes the score below 60, MapleCake notifies the project owner and admins.
 
-## 2. Environment variables
+For example, one unresolved critical bug and one separate high-priority task that is three days overdue give a score of **79** (100 − 15 − 6). The project overview points the team to both items.
 
-| Variable       | Required | Purpose |
-| -------------- | -------- | ------- |
-| `DATABASE_URL` | yes      | Supabase pooled connection used by the app |
-| `DIRECT_URL`   | yes      | Supabase direct/session connection used by `prisma migrate` |
-| `AUTH_SECRET`  | yes      | Signs session cookies. 32+ random characters: `openssl rand -base64 32` |
-| `APP_URL`      | no       | Public URL of the app (default `http://localhost:3000`) |
-| `CRON_SECRET`  | no       | 16+ characters. Enables `/api/cron/overdue` (Vercel Cron sends it automatically) |
-| `EMAIL_VERIFICATION` | no | `on` (default) or `off`. When on, sign-up needs the emailed code. See section 2a |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | production | The mail server that sends the code (port defaults to 465). Optional in development |
-| `EMAIL_FROM`   | no       | Sender shown in the email, e.g. `Maplecake <you@gmail.com>`. Defaults to `Maplecake <SMTP_USER>` |
+## Run locally
 
-All variables are read on the server only. Nothing here uses the `NEXT_PUBLIC_` prefix, so nothing reaches the browser.
-The app validates them with Zod and shows a clear message if one is missing or malformed.
-
-## 2a. Email verification (sign-up codes)
-
-Creating an account takes four fields: name, email, password and a **6-digit verification code**.
-The person clicks **Send code** (it becomes **Resend**) next to the code field, pastes the code from their inbox, and clicks **Sign up**.
-The account only exists after the code is correct, so nobody can register an address they do not own and there are never
-"unverified" accounts to clean up.
-
-**Local development: no setup needed.** With no `SMTP_*` variables the code is printed in the terminal running `npm run dev`
-(look for `[email] SMTP is not configured`). Copy it from there.
-
-**Sending real emails with Gmail** (quickest to start):
-
-1. Turn on 2-Step Verification for the Google account: https://myaccount.google.com/security
-2. Create an App Password: https://myaccount.google.com/apppasswords (a normal Gmail password will NOT work).
-3. Put it in `.env.local`:
-   ```
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=465
-   SMTP_USER=you@gmail.com
-   SMTP_PASS=abcdefghijklmnop
-   ```
-4. Restart `npm run dev`. Gmail allows roughly 500 messages a day; for a real launch use a transactional provider
-   (Resend, Brevo, Postmark, SES ... all of them offer SMTP credentials that go in the same four variables) and a domain you own, so mail does not land in spam.
-
-Set the same variables in Vercel (**Settings > Environment Variables**). In production, sending fails (and the visitor sees
-"We could not send the email") if they are missing; the real reason is in the server log.
-
-**Turning it off.** `EMAIL_VERIFICATION=off` brings back sign-up without a code. Use it for automated tests such as the e2e smoke test,
-which fills the sign-up form without an inbox. Do not use it in production.
-
-How it behaves (all of this is enforced on the server, in the database, so it holds on serverless hosting):
-
-| Rule | Value |
-| ---- | ----- |
-| Code | 6 random digits, valid for **10 minutes** |
-| Storage | Only an HMAC hash (tied to the email and `AUTH_SECRET`) is stored, never the code |
-| Wrong guesses | **5** per code, then the code is dead and a new one is needed. Guesses are counted before they are checked, so parallel requests cannot cheat |
-| Resend | Allowed every **60 seconds**; a new code replaces the old one (only the newest email works) |
-| Hourly limit | **5** codes per email address per hour |
-| One use | The code is consumed in the same transaction that creates the user, so it can never create two accounts |
-| Already registered | The email field says so as soon as you click Send code, and no email is sent |
-| Failed send | If the mail server rejects the message, the database is rolled back: no cooldown starts and the earlier code keeps working |
-| Pasting | `123 456`, `123-456` and non-Latin digits (`١٢٣٤٥٦`, `۱۲۳۴۵۶`) are all accepted |
-| Edited email | A code belongs to the address it was sent to. Change the address and the button goes back to "Send code" |
-| After a mistake | The password you typed stays in the form when the code is wrong (it is never sent back from the server) |
-| Abuse | Also limited to 20 "Send code" requests per 15 minutes per IP address (in memory, best effort) |
-
-## 3. Database and migrations
-
-The schema lives in `prisma/schema.prisma`; the SQL is in `prisma/migrations/`.
-
-| Table | Purpose |
-| ----- | ------- |
-| `User` | Accounts (unique lowercase email, bcrypt hash) |
-| `Project` | Projects with `ACTIVE` / `ARCHIVED` status and an owner |
-| `ProjectMember` | Who belongs to which project, and their role (unique per project + user) |
-| `Task` | Status, priority, type, due date, assignee, creator, completion time |
-| `ActivityLog` | Who did what in a project |
-| `Notification` | Per-user in-app notifications with read state |
-| `EmailCode` | Pending sign-up codes: one row per email (hashed code, wrong-guess count, expiry, resend limits). Deleted when the account is created |
-
-Foreign keys cascade sensibly (deleting a project removes its tasks, activity and notifications; deleting a user
-who is a task assignee sets the assignee to empty). Indexes cover the common queries (tasks by project + status,
-project + due date, member lookups, unread notifications). The migration also adds database-level `CHECK`
-constraints (lowercase email, non-blank names and titles).
+You’ll need **Node.js 20.9+**, npm, and a Supabase Postgres project.
 
 ```bash
-npm run db:deploy     # apply existing migrations (use this for Supabase and production)
-npm run db:migrate    # create a NEW migration after you edit schema.prisma (development)
-npm run db:studio     # browse the data
+git clone https://github.com/async-arham/MapleCake.git
+cd MapleCake
+npm ci
+cp .env.example .env
+cp .env.example .env.local
 ```
 
-**Row Level Security.** Supabase exposes tables in the `public` schema through its REST API. The initial migration
-turns on RLS for every table with no policies, so that API can read nothing. Maplecake is unaffected because
-it connects directly through Prisma as the table owner and enforces access in server code. Do not add permissive
-RLS policies unless you also intend to use Supabase's client libraries.
+In Supabase, open **Connect** and copy the transaction pooler and session pooler connection strings. Set these values in both files. Next.js reads `.env.local`, while Prisma commands and the seed script use `.env`.
 
-## 4. Health score
+| Variable | Value |
+| --- | --- |
+| `DATABASE_URL` | Transaction pooler URL, port **6543**, with `pgbouncer=true` in the query string. |
+| `DIRECT_URL` | Session pooler or direct connection URL, port **5432**, for migrations. |
+| `AUTH_SECRET` | Random session-signing secret of at least 32 characters. Generate one with `openssl rand -base64 32`. |
+| `APP_URL` | `http://localhost:3000` locally. Use your deployment URL in production. |
 
-Start at **100**, then subtract:
+Replace the password placeholder in each connection string and URL-encode any special characters in the password.
 
-- **Overdue open tasks:** low 2, medium 4, high 6, critical 10 points each. Tasks more than 7 days late cost 50% more. Capped at 55.
-- **Unresolved critical bugs** (type Bug, priority Critical, not Done): 15 points each. Capped at 45.
+```bash
+npm run db:deploy
+npm run dev
+```
 
-A task is overdue once its whole due day (UTC) has passed. Bands: **80+ Healthy**, **60-79 Needs watching**,
-**40-59 At risk**, **below 40 Critical**. The overview page lists each factor, the exact tasks causing it, and
-suggested actions (for example, "give an owner to 2 overdue tasks that nobody is assigned to").
-The logic is one pure function in `src/lib/health.ts`, covered by unit tests. When a change drops a project below 60,
-its owner and admins get a notification.
+Open [localhost:3000](http://localhost:3000). For local sign-up, leave SMTP unconfigured and read the verification code in the dev terminal. Run `npm run db:seed` against your development database if you want sample projects and tasks.
 
-## 5. Roles
+## Stack and codebase
 
-| | Viewer | Member | Admin | Owner |
-|---|:-:|:-:|:-:|:-:|
-| View project, board, activity | yes | yes | yes | yes |
-| Create and edit tasks, move cards | | yes | yes | yes |
-| Delete tasks | | own | any | any |
-| Edit / archive project | | | yes | yes |
-| Add or remove members below their role | | | yes | yes |
-| Delete project | | | | yes |
+**Next.js 16 App Router · React 19 · TypeScript · PostgreSQL on Supabase · Prisma 6 · Zod · CSS Modules**
 
-You can only hand out roles lower than your own; Owner can never be granted. Archived projects are read-only.
+| Path | What lives there |
+| --- | --- |
+| [`src/app/`](src/app/) | Pages, route handlers, and layout |
+| [`src/components/`](src/components/) | Kanban board, forms, and shared UI |
+| [`src/lib/`](src/lib/) | Health scoring, authorization helpers, dates, and session utilities |
+| [`src/server/`](src/server/) | Actions, services, queries, and verification email |
+| [`prisma/`](prisma/) | Database schema, migrations, and demo seed |
+| [`tests/`](tests/) | Unit, integration, and end-to-end tests |
 
-### Profile and account deletion
+Project permissions are enforced on the server. Accounts use email verification, bcrypt password hashing, and signed HTTP-only session cookies.
 
-`/profile` lets you rename yourself, change your password (current password required, 5 attempts per 15 minutes) and delete your account
-(password and your typed email required). Deleting an account:
-
-- is **blocked** while you own a project that other people belong to (there is no ownership transfer yet: delete the project or remove the others);
-- deletes projects only you belong to, together with their tasks and activity;
-- keeps tasks you created in other people's projects, handing them to that project's owner, because a task must have a creator;
-- unassigns tasks assigned to you, leaves a "deleted their account" line in each project's activity, and runs in one transaction.
-
-Changing a password does not sign out other devices (sessions are stateless JWTs that last 7 days).
-
-## 6. Testing
+## Test
 
 ```bash
 npm run typecheck
-npm test                                   # unit tests (and integration tests if TEST_DATABASE_URL is set)
-
-# Integration tests need a DISPOSABLE Postgres database with migrations applied. They empty every table first.
-TEST_DATABASE_URL="postgresql://..." npm test
-
-# End-to-end smoke test against a running production build:
-npm run build && npm start -- -p 3100      # in one terminal
-BASE=http://localhost:3100 npm run test:e2e   # in another (uses your real DATABASE_URL, creates test users)
+npm test
 ```
 
-The e2e script signs people up through the form, which now needs an emailed code. Start the server it tests with
-`EMAIL_VERIFICATION=off` (for example `EMAIL_VERIFICATION=off npm start -- -p 3100`).
+To run integration tests, set `TEST_DATABASE_URL` to a **disposable** Postgres database with migrations applied. The tests clear its tables. For the end-to-end smoke test, run a local production build on port 3100 with `EMAIL_VERIFICATION=off` and a dedicated test database, then run `BASE=http://localhost:3100 npm run test:e2e`.
 
-- **Unit tests:** health scoring, permissions, Zod schemas, date handling, rate limiter, pool config, sign-up code generation and
-  hashing, and the verification service (cooldown, hourly cap, expiry, attempt limit, double-click and double-submit races, rollback
-  on a failed send) against an in-memory fake database.
-- **Integration tests (real PostgreSQL):** a stranger gets "not found" for every read and write on someone else's project;
-  viewer / member / admin / owner rules; cross-project task access; assignment rules; pagination, search, filter and sort;
-  health score and notifications; database CHECK constraints.
-- **End-to-end test (HTTP):** register, sign in, create projects and tasks, then attack as a second user, including replaying
-  the first user's real form submissions with the second user's cookie.
+## Deploy to Vercel
 
-## 7. Deploy to Vercel
+1. Import the repository into Vercel as a Next.js project.
+2. Set the database and session variables above, use the deployed URL for `APP_URL`, and configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS` for verification emails. Set `EMAIL_FROM` if you want a custom sender.
+3. Apply migrations using `npm run db:deploy` with the deployment database settings.
+4. Set `CRON_SECRET` to a random value of at least 16 characters to enable the scheduled overdue-task check defined in [`vercel.json`](vercel.json).
+5. Deploy and open `/api/health` on your deployment. A healthy response is `{"status":"ok","database":"up"}`.
 
-1. Push the project to GitHub and **Import** it in Vercel (framework preset: Next.js).
-2. Before the first deploy, add `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `APP_URL` (your Vercel URL) and `CRON_SECRET`
-   under **Settings > Environment Variables**. (`postinstall` runs `prisma generate`; set the variables first so it works cleanly.)
-3. Apply migrations to Supabase from your machine using the production `DIRECT_URL`: `npm run db:deploy`.
-   Do this whenever you add a migration. (You can instead set the Vercel build command to `prisma migrate deploy && next build`.)
-4. Deploy. Check `https://YOUR-APP/api/health`: it should return `{"status":"ok","database":"up"}`.
-5. `vercel.json` schedules a daily job (06:00 UTC) calling `/api/cron/overdue`, which creates "task overdue" notifications.
-   Overdue notices are also created for you whenever you open the dashboard. Hobby plans allow daily cron jobs.
+---
 
-## Project structure
-
-```
-prisma/               schema, migrations, seed script
-src/
-  app/                pages and route handlers: (auth) sign in/up, (app) the signed-in product, api/
-  components/         ui/ (forms, buttons, badges, gauge), layout/, tasks/ (Kanban), projects/
-  lib/                health score, permissions, dates, constants, db client, auth/ (session, password, token, email-code)
-  server/
-    actions/          Server Actions: validate input (Zod) -> call a service -> refresh/redirect
-    email/            send.ts (SMTP) and templates.ts (the verification email)
-    services/         business rules and writes; every function takes the acting userId
-    queries/          reads (lists, dashboard, health)
-    access.ts         requireMembership(): the one gate for project data
-  validation/         Zod schemas
-  proxy.ts            route protection (Next.js 16 name for middleware)
-tests/                unit, integration, e2e
-```
-
-## Security notes
-
-- **Authorization is enforced on the server in two places:** every page calls `getProjectContext`, and every write goes through
-  `requireMembership`. Non-members get "not found" rather than "forbidden", so private projects are not revealed to strangers.
-  `proxy.ts` is only a convenience redirect.
-- Passwords: bcrypt (cost 12), 10-72 characters with a letter and a number. Login uses one generic error message and compares
-  against a dummy hash for unknown emails so timing does not reveal which emails exist.
-- Sessions: JWT (HS256) in an `HttpOnly`, `SameSite=Lax` cookie (`Secure` in production), 7 days.
-  Server Actions have built-in origin checking against cross-site form posts.
-- All input is validated with Zod; all queries go through Prisma (parameterized). React escapes output.
-- Security headers are set in `next.config.ts`.
-- **Known behaviours and limits:**
-  - Not-found pages inside the signed-in area return HTTP **200** with `noindex` (Next.js cannot change the status after streaming
-    starts). They contain no project data; this is checked by the end-to-end test.
-  - The login rate limiter is in memory, so on serverless hosting each instance counts separately. For strict limits add a
-    shared store (e.g. Redis) or a WAF rule.
-  - Registration tells you when an email is already taken (a common usability trade-off).
-  - Email addresses are verified at sign-up, but there is no password reset yet (the same code mechanism can be reused for it).
-  - The "Send code" limit per IP address is in memory (like the login limiter). The per-email cooldown, hourly cap and attempt limit live in the database and are exact.
-  - `Secure` cookies and Safari: Safari does not store `Secure` cookies on plain `http://localhost` when running `npm start`. Use `npm run dev`
-    or Chrome/Firefox for local production-mode testing.
-
-## Troubleshooting
-
-- **No verification email arrives:** check the spam folder; check the server log for `Could not send the verification email` (wrong `SMTP_PASS`,
-  or a normal Gmail password instead of an App Password); with no `SMTP_*` set in development the code is in the `npm run dev` terminal.
-- **"We could not send the email" in production:** `SMTP_HOST`, `SMTP_USER` or `SMTP_PASS` is missing in the host's environment variables.
-- **Table `EmailCode` does not exist:** run `npm run db:deploy` to apply the new migration.
-
-- **"Invalid environment variables"**: the message names the variable. Check `.env.local`.
-- **`P1001` / can't reach database**: check the password (URL-encode special characters) and that you used the pooler hostname from the Connect dialog.
-- **Prepared statement errors**: make sure `DATABASE_URL` is the *transaction pooler* URL and includes `?pgbouncer=true`.
-- **Prisma commands can't find the URL**: Prisma reads `.env`, not `.env.local`. Keep both files.
+Built by [Arham Hussain](https://github.com/async-arham).
