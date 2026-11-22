@@ -37,7 +37,7 @@ export function TaskForm({ action, projectId, members, currentUserId, task, canc
         <Field name="type" label="Type" type="select" defaultValue={task?.type ?? "TASK"} options={TASK_TYPES.map((v) => ({ value: v, label: TYPE_LABEL[v] }))} />
         <Field name="priority" label="Priority" type="select" defaultValue={task?.priority ?? "MEDIUM"} options={TASK_PRIORITIES.map((v) => ({ value: v, label: PRIORITY_LABEL[v] }))} />
         <Field name="status" label="Status" type="select" defaultValue={task?.status ?? "TODO"} options={TASK_STATUSES.map((v) => ({ value: v, label: STATUS_LABEL[v] }))} />
-        <Field name="dueDate" label="Due date" type="date" defaultValue={toDateInput(task?.dueDate)} />
+        <Field name="dueDate" label="Due date" type="date" disablePast defaultValue={toDateInput(task?.dueDate)} />
       </div>
       <Field
         name="assigneeId"
