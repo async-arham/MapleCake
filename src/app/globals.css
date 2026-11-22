@@ -69,7 +69,10 @@
   --shadow-sm: 0 1px 2px rgba(13, 12, 34, 0.05), 0 1px 3px rgba(13, 12, 34, 0.04);
   --shadow: 0 8px 28px rgba(13, 12, 34, 0.08);
   --shadow-lg: 0 20px 50px rgba(13, 12, 34, 0.13);
-  --shadow-hover: 0 1px 2px rgba(13, 12, 34, 0.06), 0 4px 12px rgba(13, 12, 34, 0.06);
+  --card-bg: radial-gradient(120% 90% at 0% 0%, #ffffff 0%, rgba(255, 255, 255, 0) 60%), linear-gradient(160deg, #ffffff 0%, #f8f8fb 100%);
+  --card-bg-hover: radial-gradient(120% 90% at 0% 0%, #fbfbfd 0%, rgba(251, 251, 253, 0) 60%), linear-gradient(160deg, #f6f6f9 0%, #eeeff4 100%);
+  --card-border: #e6e8ee;
+  --card-border-hover: rgba(13, 12, 34, 0.28);
   --page-width: 76rem;
 }
 
