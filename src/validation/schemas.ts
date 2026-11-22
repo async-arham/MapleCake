@@ -5,7 +5,7 @@ import {
   TASK_STATUSES,
   TASK_TYPES,
 } from "@/lib/constants";
-import { parseDateOnly } from "@/lib/dates";
+import { MAX_DUE_YEAR, parseDateOnly } from "@/lib/dates";
 import { CODE_FORMAT, normalizeCode } from "@/lib/auth/email-code-config";
 
 // ---------- helpers ----------
@@ -97,6 +97,10 @@ const dueDate = z
     const parsed = parseDateOnly(value);
     if (!parsed) {
       ctx.addIssue({ code: "custom", message: "Enter a valid date" });
+      return z.NEVER;
+    }
+    if (parsed.getUTCFullYear() > MAX_DUE_YEAR) {
+      ctx.addIssue({ code: "custom", message: `Pick a date before ${MAX_DUE_YEAR + 1}` });
       return z.NEVER;
     }
     return parsed;
