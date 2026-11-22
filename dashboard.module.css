@@ -1,0 +1,72 @@
+.stats { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr)); margin-bottom: 2.5rem; }
+.stat { display: grid; align-content: start; gap: 0.15rem; background: #fff; border-radius: var(--radius-lg); padding: 1.5rem 1.6rem; }
+.statIcon { font-size: 2.1rem; margin-bottom: 0.9rem; }
+.statLabel { font-size: 0.9rem; font-weight: 600; color: var(--ink-soft); }
+.statValue { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.045em; line-height: 1.1; }
+.statWarn .statValue { color: var(--red); }
+.statNote { min-height: 1.3em; font-size: 0.82rem; line-height: 1.3; color: var(--ink-faint); font-weight: 600; }
+
+.section { margin-bottom: 2.75rem; }
+.section h2 { display: flex; align-items: center; gap: 0.7rem; font-size: 1.55rem; margin-bottom: var(--space-4); }
+.section h2 > span { font-size: 1.7rem; }
+
+.healthGrid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); }
+.healthCard { display: flex; gap: 1.1rem; align-items: center; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; text-decoration: none; color: var(--ink); transition: background 0.2s, border-color 0.2s; }
+.healthCard:hover { background: var(--card-bg-hover); border-color: var(--card-border-hover); }
+.healthText { min-width: 0; flex: 1; }
+.healthName { font-weight: 800; font-size: 1.08rem; }
+.healthMeta { font-size: 0.86rem; color: var(--ink-soft); margin-top: 0.15rem; }
+.healthGo { font-size: 1.4rem; color: var(--ink-faint); transition: transform 0.2s, color 0.2s; }
+.healthCard:hover .healthGo { transform: translateX(4px); color: var(--ink); }
+
+.charts { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 19.5rem), 1fr)); }
+.chartTitle { font-size: 1.1rem; margin-bottom: var(--space-6); }
+.barRow { display: grid; grid-template-columns: 6.5rem 1fr 2rem; gap: var(--space-3); align-items: center; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; }
+.barTrack { background: #eceef3; border-radius: var(--pill); height: 0.8rem; overflow: hidden; }
+.barFill { display: block; height: 100%; border-radius: var(--pill); background: var(--blue); transform-origin: left; animation: grow 1s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 90ms + 200ms); }
+@keyframes grow { from { transform: scaleX(0); } }
+.fill_DONE { background: var(--green); }
+.fill_CRITICAL { background: var(--red); }
+.fill_HIGH { background: var(--orange); }
+.fill_MEDIUM { background: var(--blue); }
+.fill_LOW { background: #a9abb8; }
+.fill_IN_REVIEW { background: #e0b400; }
+.fill_IN_PROGRESS { background: var(--blue); }
+.fill_TODO { background: #a9abb8; }
+.barNum { text-align: right; font-weight: 800; }
+.columns { display: flex; align-items: flex-end; gap: var(--space-3); height: 10rem; }
+.col { flex: 1; display: grid; gap: var(--space-1); text-align: center; align-content: end; height: 100%; font-size: 0.75rem; font-weight: 600; color: var(--ink-soft); }
+.colBar { background: var(--yellow); border: 2px solid var(--ink); border-radius: 0.6rem 0.6rem 0 0; min-height: 4px; transform-origin: bottom; animation: growUp 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 90ms + 200ms); }
+@keyframes growUp { from { transform: scaleY(0); } }
+.colNum { font-weight: 800; color: var(--ink); }
+
+.list { list-style: none; margin: 0; padding: 0; display: grid; }
+.list li { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding: 0.9rem 0; border-bottom: 1px solid #eef0f4; flex-wrap: wrap; }
+.list li:last-child { border-bottom: 0; }
+.list a { font-weight: 700; text-decoration: none; }
+.list a:hover { text-decoration: underline; text-decoration-color: var(--yellow); }
+.muted { color: var(--ink-soft); font-size: 0.9rem; }
+.right { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+/* "get more done" cards, like the reference's "More ways to earn" */
+.actions { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
+.actionCard { display: flex; flex-direction: column; gap: 0.6rem; background: #fff; border-radius: var(--radius-lg); padding: 1.9rem 1.7rem 1.7rem; }
+.actionIcon { font-size: 2.6rem; margin-bottom: 0.6rem; }
+.actionCard h3 { font-size: 1.35rem; }
+.actionCard p { color: var(--ink-soft); font-size: 1.02rem; flex: 1; margin-bottom: 0.9rem; }
+.arrowPill { display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0.4rem 0.4rem 1.5rem; border: 1.5px solid #e1e2e8; border-radius: var(--pill); color: var(--ink); font-weight: 600; text-decoration: none; transition: background 0.15s, border-color 0.15s; }
+.arrowPill:hover { background: #f6f7fa; border-color: #cfd1da; }
+.arrowCircle { display: grid; place-items: center; width: 2.7rem; height: 2.7rem; border-radius: 50%; background: #f1f2f6; font-size: 1.2rem; transition: background 0.15s; }
+.arrowPill:hover .arrowCircle { background: var(--yellow); }
+
+@media (max-width: 40rem) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 2rem; }
+  .stat { padding: 1.1rem 1.1rem 1.15rem; }
+  .statIcon { font-size: 1.8rem; margin-bottom: 0.6rem; }
+  .statValue { font-size: 2.1rem; }
+  .section { margin-bottom: 2.25rem; }
+  .section h2 { font-size: 1.35rem; }
+  .healthCard { padding: 1.1rem 1.15rem; }
+  .actionCard { padding: 1.4rem 1.25rem 1.25rem; }
+  .barRow { grid-template-columns: 5.2rem 1fr 1.8rem; }
+}
