@@ -11,8 +11,8 @@
 .section h2 > span { font-size: 1.7rem; }
 
 .healthGrid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); }
-.healthCard { display: flex; gap: 1.1rem; align-items: center; background: #fff; border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; text-decoration: none; color: var(--ink); transition: box-shadow 0.2s; }
-.healthCard:hover { box-shadow: var(--shadow-hover); }
+.healthCard { display: flex; gap: 1.1rem; align-items: center; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; text-decoration: none; color: var(--ink); transition: background 0.2s, border-color 0.2s; }
+.healthCard:hover { background: var(--card-bg-hover); border-color: var(--card-border-hover); }
 .healthText { min-width: 0; flex: 1; }
 .healthName { font-weight: 800; font-size: 1.08rem; }
 .healthMeta { font-size: 0.86rem; color: var(--ink-soft); margin-top: 0.15rem; }
