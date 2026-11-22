@@ -12,7 +12,7 @@
 
 .healthGrid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); }
 .healthCard { display: flex; gap: 1.1rem; align-items: center; background: #fff; border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; text-decoration: none; color: var(--ink); transition: box-shadow 0.2s; }
-.healthCard:hover { box-shadow: 0 12px 32px rgba(13, 12, 34, 0.1); }
+.healthCard:hover { box-shadow: var(--shadow-hover); }
 .healthText { min-width: 0; flex: 1; }
 .healthName { font-weight: 800; font-size: 1.08rem; }
 .healthMeta { font-size: 0.86rem; color: var(--ink-soft); margin-top: 0.15rem; }
