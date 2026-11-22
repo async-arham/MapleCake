@@ -1,6 +1,6 @@
 .grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr)); }
 .card { position: relative; display: grid; gap: 1rem; background: #fff; border-radius: var(--radius-lg); padding: 1.5rem; text-decoration: none; color: var(--ink); transition: box-shadow 0.2s; }
-.card:hover { box-shadow: 0 12px 32px rgba(13, 12, 34, 0.1); }
+.card:hover { box-shadow: var(--shadow-hover); }
 .cardTop { display: flex; gap: 1rem; align-items: center; }
 .avatar { flex: none; display: grid; place-items: center; width: 3.2rem; height: 3.2rem; border-radius: 1rem; font-weight: 800; font-size: 1.25rem; }
 .tone0 { background: #ffe9a8; color: #5c4600; }
