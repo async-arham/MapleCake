@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
-import { MAX_YEAR, MIN_YEAR, addDays, formatKey, monthGrid, monthLabel, moveByMonths, parseKey, todayKey, weekdayIndex } from "@/lib/calendar";
+import { MAX_YEAR, MIN_YEAR, addDays, formatKey, monthGrid, monthLabel, moveByMonths, parseKey, toKey, todayKey, weekdayIndex } from "@/lib/calendar";
 import styles from "./ui.module.css";
 
 const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
@@ -19,6 +19,8 @@ type Props = {
   disabled?: boolean;
   invalid?: boolean;
   placeholder?: string;
+  /** Days before today are shown greyed out and cannot be picked. A date that was already saved stays selectable. */
+  disablePast?: boolean;
   autoFocus?: boolean;
   "aria-describedby"?: string;
 };
@@ -28,12 +30,17 @@ type Props = {
  * through a hidden input. Supports the keyboard (arrows, Page Up/Down, Home/End, Escape), a Today
  * shortcut, and clearing the date.
  */
-export function DatePicker({ name, id, defaultValue = "", value: controlled, onChange, disabled, invalid, placeholder = "Pick a date", autoFocus, ...aria }: Props) {
+export function DatePicker({ name, id, defaultValue = "", value: controlled, onChange, disabled, invalid, placeholder = "Pick a date", disablePast, autoFocus, ...aria }: Props) {
   const autoId = useId();
   const triggerId = id ?? autoId;
   const [inner, setInner] = useState(defaultValue);
   const value = controlled ?? inner;
   const hasValue = Boolean(parseKey(value));
+  // The date the form started with stays pickable even if it is already past (an overdue task being edited).
+  const initialKey = useRef(defaultValue).current;
+  const minKey = disablePast ? todayKey() : null;
+  const minMonth = minKey ? `${minKey.slice(0, 8)}01` : null;
+  const isBlocked = (key: string) => Boolean(minKey) && key < minKey! && key !== initialKey;
 
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -120,6 +127,8 @@ export function DatePicker({ name, id, defaultValue = "", value: controlled, onC
   const goTo = (key: string, focus: boolean) => {
     const p = parseKey(key);
     if (!p || p.y < MIN_YEAR || p.y > MAX_YEAR) return;
+    // Never land on a blocked day: going back past today stops at today.
+    if (isBlocked(key) && minKey) key = minKey;
     moveFocus.current = focus;
     setFocusKey(key);
   };
@@ -143,6 +152,9 @@ export function DatePicker({ name, id, defaultValue = "", value: controlled, onC
   const view = parseKey(focusKey)!;
   const today = todayKey();
   const cells = monthGrid(view.y, view.m);
+  const viewStart = toKey(view.y, view.m, 1);
+  const prevMonthOff = Boolean(minMonth) && viewStart <= minMonth!;
+  const prevYearOff = Boolean(minMonth) && moveByMonths(viewStart, -12) < minMonth!;
 
   return (
     <>
@@ -183,10 +195,10 @@ export function DatePicker({ name, id, defaultValue = "", value: controlled, onC
             onKeyDown={onPanelKeyDown}
           >
             <div className={styles.calHead}>
-              <button type="button" className={styles.calNav} aria-label="Previous year" onClick={() => goTo(moveByMonths(focusKey, -12), false)}>
+              <button type="button" className={styles.calNav} aria-label="Previous year" disabled={prevYearOff} onClick={() => goTo(moveByMonths(focusKey, -12), false)}>
                 <i className="ri-arrow-left-double-line" aria-hidden="true" />
               </button>
-              <button type="button" className={styles.calNav} aria-label="Previous month" onClick={() => goTo(moveByMonths(focusKey, -1), false)}>
+              <button type="button" className={styles.calNav} aria-label="Previous month" disabled={prevMonthOff} onClick={() => goTo(moveByMonths(focusKey, -1), false)}>
                 <i className="ri-arrow-left-s-line" aria-hidden="true" />
               </button>
               <div className={styles.calTitle} aria-live="polite">{monthLabel(view.y, view.m)}</div>
@@ -209,6 +221,7 @@ export function DatePicker({ name, id, defaultValue = "", value: controlled, onC
                   tabIndex={cell.key === focusKey ? 0 : -1}
                   aria-label={formatKey(cell.key)}
                   aria-pressed={cell.key === value}
+                  disabled={isBlocked(cell.key)}
                   className={`${styles.day} ${cell.inMonth ? "" : styles.dayOut} ${cell.key === today ? styles.dayToday : ""} ${cell.key === value ? styles.daySelected : ""}`}
                   onClick={() => pick(cell.key)}
                 >

@@ -169,6 +169,10 @@ textarea.input { min-height: 8rem; max-height: 22rem; resize: none; field-sizing
 .day { display: grid; place-items: center; aspect-ratio: 1; border: 0; border-radius: 50%; background: transparent; font: inherit; font-size: 0.92rem; font-weight: 600; color: var(--ink); cursor: pointer; transition: background 0.12s; }
 .day:hover { background: #f1f2f6; }
 .dayOut { color: #b5b7c3; }
+.day:disabled { color: #cfd1da; cursor: not-allowed; text-decoration: line-through; text-decoration-color: rgba(13, 12, 34, 0.12); }
+.day:disabled:hover { background: transparent; }
+.calNav:disabled { opacity: 0.3; cursor: not-allowed; }
+.calNav:disabled:hover { background: transparent; }
 .dayToday { box-shadow: inset 0 0 0 2px var(--ink); }
 .daySelected, .daySelected:hover { background: var(--yellow); font-weight: 800; }
 .day:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }

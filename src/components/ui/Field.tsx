@@ -31,9 +31,11 @@ type Props = {
   trailing?: ReactNode;
   /** Which on-screen keyboard phones show. */
   inputMode?: "text" | "numeric" | "email";
+  /** Date fields only: days before today cannot be picked. */
+  disablePast?: boolean;
 };
 
-export function Field({ name, label, type = "text", defaultValue, options, required, hint, autoComplete, disabled, maxLength, placeholder, autoFocus, labelHidden, onValueChange, error: errorProp, trailing, inputMode }: Props) {
+export function Field({ name, label, type = "text", defaultValue, options, required, hint, autoComplete, disabled, maxLength, placeholder, autoFocus, labelHidden, onValueChange, error: errorProp, trailing, inputMode, disablePast }: Props) {
   const id = useId();
   const { state } = useFormMeta();
   const [revealed, setRevealed] = useState(false);
@@ -74,7 +76,7 @@ export function Field({ name, label, type = "text", defaultValue, options, requi
       ) : type === "select" ? (
         <Select key={key} id={id} name={name} options={options ?? []} defaultValue={value} invalid={Boolean(error)} disabled={disabled} aria-describedby={describedBy} />
       ) : type === "date" ? (
-        <DatePicker key={key} id={id} name={name} defaultValue={value} invalid={Boolean(error)} disabled={disabled} aria-describedby={describedBy} />
+        <DatePicker key={key} id={id} name={name} defaultValue={value} disablePast={disablePast} invalid={Boolean(error)} disabled={disabled} aria-describedby={describedBy} />
       ) : type === "password" ? (
         <div className={styles.passwordWrap}>
           <input key={key} {...common} type={revealed ? "text" : "password"} defaultValue={value} autoComplete={autoComplete} maxLength={maxLength} autoCapitalize="none" autoCorrect="off" spellCheck={false} onChange={(e) => onValueChange?.(e.target.value)} />
