@@ -5,6 +5,19 @@ export function startOfTodayUtc(now: Date = new Date()): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 }
 
+/** Latest year the date picker offers. Keep in sync with MAX_YEAR in calendar.ts. */
+export const MAX_DUE_YEAR = 2200;
+
+/**
+ * True when a due date is clearly in the past. The picker blocks past days using the visitor's own
+ * calendar, which can lag UTC by up to a day (and lead it by up to a day), so the server allows one
+ * day of slack instead of rejecting someone who is still on "today" in a time zone behind UTC.
+ */
+export function isDueDateInPast(date: Date, now: Date = new Date()): boolean {
+  const cutoff = startOfTodayUtc(now).getTime() - 24 * 60 * 60 * 1000;
+  return date.getTime() < cutoff;
+}
+
 /** Parses "YYYY-MM-DD" into a UTC midnight Date, or null if it is not a real calendar date. */
 export function parseDateOnly(value: string): Date | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
