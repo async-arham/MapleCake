@@ -2,6 +2,7 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { STATUS_LABEL, type TaskStatus } from "@/lib/constants";
+import { isDueDateInPast } from "@/lib/dates";
 import { canDeleteTask } from "@/lib/permissions";
 import type { TaskInput } from "@/validation/schemas";
 import { assertActive, requireMembership } from "../access";
@@ -41,9 +42,12 @@ async function notifyIfHealthDropped(projectId: string, projectName: string, bef
   }
 }
 
+const PAST_DUE_MESSAGE = "Due date can’t be in the past. Pick today or a later day.";
+
 export async function createTask(userId: string, projectId: string, input: TaskInput) {
   const { project } = await requireMembership(userId, projectId, "task:create");
   assertActive(project);
+  if (input.dueDate && isDueDateInPast(input.dueDate)) throw new AppError("VALIDATION", PAST_DUE_MESSAGE);
   await assertAssigneeIsMember(projectId, input.assigneeId);
   const before = (await getProjectHealth(projectId)).score;
 
@@ -91,6 +95,9 @@ async function changeTask(userId: string, projectId: string, taskId: string, pat
   const existing = await db.task.findFirst({ where: { id: taskId, projectId } });
   if (!existing) throw new AppError("NOT_FOUND", "Task not found.");
   if (patch.assigneeId !== undefined) await assertAssigneeIsMember(projectId, patch.assigneeId);
+  // Only a changed due date is checked, so an already overdue task can still be renamed, reassigned or closed.
+  const dueDateChanged = patch.dueDate !== undefined && patch.dueDate?.getTime() !== existing.dueDate?.getTime();
+  if (dueDateChanged && patch.dueDate && isDueDateInPast(patch.dueDate)) throw new AppError("VALIDATION", PAST_DUE_MESSAGE);
   const before = (await getProjectHealth(projectId)).score;
 
   const data: Prisma.TaskUncheckedUpdateInput = {};
