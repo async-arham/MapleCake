@@ -120,15 +120,19 @@ textarea.input { min-height: 8rem; max-height: 22rem; resize: none; field-sizing
 .toolbar .input { padding: 0.7rem 1rem; }
 
 /* ---------- animated health gauge ---------- */
-.gauge { display: block; }
+.gauge { display: block; overflow: visible; --g1: #47d17f; --g2: #1f9d57; }
+.g_healthy { --g1: #47d17f; --g2: #1f9d57; --g-dot: #1f9d57; }
+.g_watch { --g1: #ffe45c; --g2: #e0b400; --g-dot: #e0b400; }
+.g_at_risk { --g1: #ffb15c; --g2: #e8710a; --g-dot: #e8710a; }
+.g_critical { --g1: #ff8a7e; --g2: #e5382b; --g-dot: #e5382b; }
+.gaugeDisc { fill: #f8f8fb; }
 .gaugeTrack { fill: none; stroke: #eceef3; }
-.gaugeValue { fill: none; stroke-linecap: round; stroke-dasharray: var(--score, 0) 100; animation: gaugeIn 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.gaugeValue { fill: none; stroke-linecap: round; stroke-dasharray: var(--score, 0) 100; animation: gaugeIn 1.3s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.gaugeDot { fill: #fff; stroke: var(--g-dot); stroke-width: 2.5; transform-box: view-box; transform-origin: 60px 60px; transform: rotate(calc(var(--score, 0) * 3.6deg)); animation: gaugeDotIn 1.3s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.gaugeNumber { font-family: var(--font-display); font-weight: 800; fill: var(--ink); letter-spacing: -0.02em; animation: gaugeNumIn 0.7s 0.25s ease-out both; }
 @keyframes gaugeIn { from { stroke-dasharray: 0 100; } }
-.g_healthy { stroke: var(--green); }
-.g_watch { stroke: #e0b400; }
-.g_at_risk { stroke: var(--orange); }
-.g_critical { stroke: var(--red); }
-.gaugeNumber { font-family: var(--font-display); font-weight: 800; fill: var(--ink); }
+@keyframes gaugeDotIn { from { transform: rotate(0deg); } }
+@keyframes gaugeNumIn { from { opacity: 0; } }
 
 /* ---------- custom dropdown ---------- */
 .selectTrigger { min-width: 0; max-width: 100%; display: flex; align-items: center; gap: 0.6rem; width: 100%; font: inherit; text-align: left; padding: 0.95rem 1.2rem; color: var(--ink); background: var(--field); border: 2px solid transparent; border-radius: var(--radius-md); cursor: pointer; transition: background 0.15s, border-color 0.15s, box-shadow 0.15s; }
