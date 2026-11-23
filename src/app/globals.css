@@ -131,14 +131,16 @@ h1, h2, h3, p, li, dd, td, th, label, a { overflow-wrap: anywhere; }
   .sb-hidden { opacity: 1; transform: none; }
 }
 
-/* Thin, slightly larger plus. Replaces the heavy Remix "add" glyph everywhere it is used (buttons, sidebar). */
-i.ri-add-line { display: inline-flex; align-items: center; justify-content: center; }
+/* Plus icon: drawn as SVG so its stroke matches the label's weight and its height matches the capital letters.
+   Replaces the heavy Remix "add" glyph everywhere it is used (buttons, sidebar). */
+i.ri-add-line { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
 i.ri-add-line::before {
   content: "";
   display: block;
-  width: 1.15em;
-  height: 1.15em;
+  width: 1.05em;
+  height: 1.05em;
+  transform: translateY(-0.04em); /* optical centering on the cap height of the label */
   background-color: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6'%3E%3Cpath d='M12 4v16M4 12h16'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6'%3E%3Cpath d='M12 4v16M4 12h16'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4'%3E%3Cpath d='M12 3v18M3 12h18'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4'%3E%3Cpath d='M12 3v18M3 12h18'/%3E%3C/svg%3E") center / contain no-repeat;
 }
